@@ -1,5 +1,4 @@
 #include <UI.h>
-#include <curses.h>
 
 void UI::GenerateUI()
 {
@@ -8,6 +7,8 @@ void UI::GenerateUI()
   GenerateWindow(Actions_Window,4,COLS-2,LINES-5,1);
 
   GenerateWindow(Inventory_Window,LINES-(Actions_Window.getHeight())-2 ,20,1,1);
+  std::string str = "INVETORY";
+  Inventory_Window.Print_Window_Title(str);
 
   GenerateWindow(Status_Window,9,COLS-(Inventory_Window.getWidth())-2,1,(Inventory_Window.getWidth() + 1));
   

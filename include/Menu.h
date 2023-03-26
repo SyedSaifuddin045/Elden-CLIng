@@ -1,3 +1,4 @@
+#include <ncurses.h>
 #include <menu.h>
 #include <vector>
 #include <string>

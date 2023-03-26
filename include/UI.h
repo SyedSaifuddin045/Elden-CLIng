@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <Window.h>
+#include <Menu.h>
 
 class UI{
   private:
