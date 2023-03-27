@@ -1,8 +1,16 @@
-#include <ncurses.h>
 #include <menu.h>
-#include <vector>
+#include <ncurses.h>
 #include <string>
-class Menu{
-  public:
-  static MENU* Create_Menu(std::vector<std::string>& Choices);
+#include <vector>
+
+#ifndef MENU_H
+#define MENU_H
+class Menu {
+  MENU *menu;
+  ITEM **items;
+public:
+  Menu():items(NULL),menu(nullptr){};
+  MENU* getMENU()const { return menu;}
+  void setMENU(MENU* m) { menu = m; }
 };
+#endif // !MENU_H
