@@ -50,4 +50,7 @@ public:
   int getPosY() const { return pos_y; }
   WINDOW* getWindow() const { return window; }
   Menu getMenu() const { return menu;}
+  void setMenu (Menu M){
+    menu = M;
+  }
 };

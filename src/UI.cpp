@@ -14,44 +14,36 @@ std::vector<std::string> INVENTORY = {
   "I 7",
   "I 8",
   "I 9",
-  "I 10"
+  "I 10",
+  "I 11",
 };
-
+std::vector<std::string> Options = {
+  "ATTACK","DODGE","BLOCK","MOVE","INVENTORY","REST"
+};
 void UI::GenerateUI()
 {
   GenerateWindow(Main_Window,0,0,0,0);
 
-  GenerateWindow(Actions_Window,4,COLS-2,LINES-5,1);
-
+  GenerateWindow(Actions_Window,8,COLS-2,LINES-9,1);
+  Menu action_menu;
+  action_menu.Create(Actions_Window.getWindow(),1,1,6,20,Options);
+  Actions_Window.setMenu(action_menu);
   GenerateWindow(Inventory_Window,LINES-(Actions_Window.getHeight())-2 ,20,1,1);
 
-  ITEM **items;
-  MENU* menu;
-  items = new ITEM*[INVENTORY.size()];
+  Menu inventory_menu;
+  inventory_menu.Create(Inventory_Window.getWindow(), 2, 1, Inventory_Window.getHeight() -4, Inventory_Window.getWidth()-2, INVENTORY);
+  Inventory_Window.setMenu(inventory_menu);
 
-  for(int i = 0;i<INVENTORY.size();i++)
-  {
-    items[i] = new_item(INVENTORY[i].c_str(), "");
-  }
-  items[INVENTORY.size()] = new_item(NULL, NULL);
-
-  menu = new_menu((ITEM**)items) ;
-  set_menu_win(menu, Inventory_Window.getWindow());
-  set_menu_sub(menu, derwin(Inventory_Window.getWindow(), 10, 10, 3, 1) );
-  set_menu_format(menu, 10, 1);
-  post_menu(menu);
-
-  wrefresh(Inventory_Window.getWindow());
-  //Inventory_Window.Refresh();
-  std::string str = "INVETORY";
+  std::string str = "INVENTORY";
   Inventory_Window.Print_Window_Title(str);
 
-  //unpost_menu(menu);
   GenerateWindow(Status_Window,9,COLS-(Inventory_Window.getWidth())-2,1,(Inventory_Window.getWidth() + 1));
-  
+
   GenerateWindow(Game_Window,LINES - (Status_Window.getHeight()+Actions_Window.getHeight()+2),(COLS-Inventory_Window.getWidth()-2),Status_Window.getHeight()+1,Inventory_Window.getWidth()+1);
 
   wgetch(Game_Window.getWindow());
+
+  inventory_menu.Destroy();
 }
 
 void UI::GenerateWindow(Window &win,int height,int width,int start_y,int start_x)
