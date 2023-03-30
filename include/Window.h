@@ -1,3 +1,6 @@
+#ifndef WINDOW_H
+#define WINDOW_H
+
 #include <menu.h>
 #include <ncurses.h>
 #include <string>
@@ -54,3 +57,4 @@ public:
     menu = M;
   }
 };
+#endif //  WINDOW_H

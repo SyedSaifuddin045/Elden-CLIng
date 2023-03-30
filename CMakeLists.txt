@@ -20,4 +20,4 @@ include_directories(${CURSES_INCLUDE_DIR})
 
 add_executable(${PROJECT_NAME} ${source_files} ${header_files})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${CURSES_LIBRARIES} menu ncurses)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CURSES_LIBRARIES} ncurses menu)

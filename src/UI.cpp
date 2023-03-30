@@ -1,26 +1,8 @@
 #include <UI.h>
-#include <curses.h>
 #include <menu.h>
 #include <string>
 #include <vector>
-
-std::vector<std::string> INVENTORY = {
-  "I 1",
-  "I 2",
-  "I 3",
-  "I 4",
-  "I 5",
-  "I 6",
-  "I 7",
-  "I 8",
-  "I 9",
-  "I 10",
-  "I 11",
-};
-std::vector<std::string> Options = {
-  "ATTACK","DODGE","BLOCK","MOVE","INVENTORY","REST"
-};
-void UI::GenerateUI()
+void UI::GenerateUI(std::vector<std::string> Options,std::vector<std::string>INVENTORY)
 {
   GenerateWindow(Main_Window,0,0,0,0);
 
@@ -57,4 +39,8 @@ void UI::GenerateWindow(Window &win,int height,int width,int start_y,int start_x
   win.Box(0, 0);
   wattroff(win.getWindow(), COLOR_PAIR(1));
   win.Refresh();
+}
+
+void UI::GenerateMainMenu(){
+
 }
