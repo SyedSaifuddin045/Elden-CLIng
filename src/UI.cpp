@@ -13,7 +13,7 @@ void UI::GenerateUI(std::vector<std::string> Options,std::vector<std::string>INV
   GenerateWindow(Inventory_Window,LINES-(Actions_Window.getHeight())-2 ,20,1,1);
 
   Menu inventory_menu;
-  inventory_menu.Create(Inventory_Window.getWindow(), 2, 1, Inventory_Window.getHeight() -4, Inventory_Window.getWidth()-2, INVENTORY);
+  inventory_menu.Create(Inventory_Window.getWindow(), 3, 1, Inventory_Window.getHeight() -4, Inventory_Window.getWidth()-2, INVENTORY);
   Inventory_Window.setMenu(inventory_menu);
 
   std::string str = "INVENTORY";
@@ -23,9 +23,9 @@ void UI::GenerateUI(std::vector<std::string> Options,std::vector<std::string>INV
 
   GenerateWindow(Game_Window,LINES - (Status_Window.getHeight()+Actions_Window.getHeight()+2),(COLS-Inventory_Window.getWidth()-2),Status_Window.getHeight()+1,Inventory_Window.getWidth()+1);
 
-  wgetch(Game_Window.getWindow());
+  //wgetch(Game_Window.getWindow());
 
-  inventory_menu.Destroy();
+  //inventory_menu.Destroy();
 }
 
 void UI::GenerateWindow(Window &win,int height,int width,int start_y,int start_x)
@@ -41,6 +41,27 @@ void UI::GenerateWindow(Window &win,int height,int width,int start_y,int start_x
   win.Refresh();
 }
 
-void UI::GenerateMainMenu(){
+void UI::GenerateMainMenu(std::vector<std::string> &Options){
+  GenerateWindow(Main_Menu_Window,Options.size()+2,12,(LINES-Options.size())/2,(COLS-Options[1].size())/2 );
 
+  Menu main_menu;
+  main_menu.Create(Main_Menu_Window.getWindow(), 1, 0, Main_Menu_Window.getHeight()-2, Main_Menu_Window.getWidth(), Options);
+  Main_Menu_Window.setMenu(main_menu);
+}
+
+void UI::GenerateCharaterSelect(std::vector<std::string> &Characters)
+{
+  Main_Menu_Window.DestroyWindow();
+  GenerateWindow(Character_Select_Window, Characters.size() + 2, Characters[1].size()+3, (LINES - Characters.size()) / 2, (COLS - Characters[1].size())/2);
+
+  Menu Character_menu;
+  Character_menu.Create(Character_Select_Window.getWindow(), 1, 0, Character_Select_Window.getHeight()-2, Character_Select_Window.getWidth(), Characters);
+  Character_Select_Window.setMenu(Character_menu);
+}
+
+void UI::Clear(){
+  for(auto win : { Main_Window,Actions_Window,Inventory_Window,Status_Window,Game_Window,Main_Menu_Window,Character_Select_Window})
+  {
+    win.DestroyWindow();
+  }
 }

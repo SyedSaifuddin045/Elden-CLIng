@@ -30,8 +30,8 @@ public:
 
     menu = new_menu(items.data());
     set_menu_win(menu, window);
-    set_menu_sub(menu, derwin(window, height - 2, width - 2, 1, 1));
-    set_menu_format(menu, height - 2, 1);
+    set_menu_sub(menu, derwin(window, height, width - 2, 0, 1));
+    set_menu_format(menu, height, 1);
     post_menu(menu);
 
     wrefresh(window);

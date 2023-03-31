@@ -47,6 +47,13 @@ public:
 
     wrefresh(window);
   }
+  void DestroyWindow()
+  {
+    wclear(window);
+    wrefresh(window);
+    delwin(window);
+    refresh();
+  }
   int getWidth() const { return width; }
   int getHeight() const { return height; }
   int getPosX() const { return pos_x; }
