@@ -1,4 +1,5 @@
 #include <Game.h>
+#include <Random.h>
 #include <string>
 #include <vector>
 
@@ -20,3 +21,6 @@ std::vector<std::string> Game::MAIN_MENU_OPTIONS = {
 std::vector<std::string> Game::CHARACTERS = {
   "Character 1","Character 2","Character 3","Character 4","Character 5"
 };
+
+std::mt19937 Random::engine{std::random_device{}()};
+int Game::game_row,Game::game_col;
