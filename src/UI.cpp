@@ -2,6 +2,7 @@
 #include <Game.h>
 #include <UI.h>
 #include <curses.h>
+#include <string>
 void UI::GeneratePlayGameUI(std::vector<std::string> Options,std::vector<std::string>INVENTORY)
 {
   GenerateWindow(Main_Window,0,0,0,0);
@@ -21,6 +22,7 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,std::vector<std::st
   Inventory_Window.Print_Window_Title(str);
 
   GenerateWindow(Status_Window,9,COLS-(Inventory_Window.getWidth())-2,1,(Inventory_Window.getWidth() + 1));
+  GenerateStatusWindow();
 
   GenerateWindow(Game_Window,LINES - (Status_Window.getHeight()+Actions_Window.getHeight()+2),(COLS-Inventory_Window.getWidth()-2),Status_Window.getHeight()+1,Inventory_Window.getWidth()+1);
 
@@ -168,4 +170,45 @@ for (int i = 1; i < row; i += 2) {
     mvwprintw(window, row_begin + x, col_begin + y, "0");
 }
     wattroff(window, A_BOLD|COLOR_PAIR(3));
+}
+
+void UI::GenerateStatusWindow()
+{
+  wattron(Status_Window.getWindow(), COLOR_PAIR(4));
+  int w_max_x = Status_Window.getWidth() , w_max_y = Status_Window.getHeight();
+  int beg_x = 1 , beg_y = 1;
+  mvwprintw(Status_Window.getWindow(),beg_x,beg_y,"PLAYER :");
+  int rand_HP = Random::Random_Number(1, 10)*10;
+  //int rand_HP = 100;
+  std::string E = "HP:["+std::to_string(rand_HP)+"]";
+  mvwprintw(Status_Window.getWindow(),beg_y+2,beg_x,"%s",E.c_str());
+  int j=0;
+  for(int i = rand_HP;i>0;i=i-10)
+  {
+    mvwaddch(Status_Window.getWindow(),beg_y+2,beg_x+E.size()+j, ACS_DIAMOND);
+    j+=1;
+  }
+  //int rand_STAMINA = 100;
+  int rand_STAMINA = Random::Random_Number(1, 10)*10;
+  E = "STAMINA:["+std::to_string(rand_STAMINA)+"]";
+  mvwprintw(Status_Window.getWindow(), beg_y+4, beg_x, "%s",E.c_str());
+  j=1;
+  for(int i = rand_STAMINA;i>0;i=i-10)
+  {
+    mvwaddch(Status_Window.getWindow(),beg_y+4,beg_x+E.size()+j, ACS_CKBOARD);
+    j+=1;
+  }
+  int Player_Level = 100;
+  E = "LEVEL:["+std::to_string(Player_Level)+"]";
+  mvwprintw(Status_Window.getWindow(), beg_y+6, beg_x, "%s",E.c_str());
+  E = "ENEMY :";
+  mvwprintw(Status_Window.getWindow(),beg_x,w_max_x-E.size()-1,"%s", E.c_str());
+  E = "HP :";
+  mvwprintw(Status_Window.getWindow(),beg_x+2,w_max_x-E.size()-1,"%s", E.c_str());
+  E = "STAMINA :";
+  mvwprintw(Status_Window.getWindow(),beg_x+4,w_max_x-E.size()-1,"%s", E.c_str());
+  E = "LEVEL : ";
+  mvwprintw(Status_Window.getWindow(),beg_x+6,w_max_x-E.size()-1,"%s", E.c_str());
+  wattroff(Status_Window.getWindow(), COLOR_PAIR(4));
+  Status_Window.Refresh();
 }

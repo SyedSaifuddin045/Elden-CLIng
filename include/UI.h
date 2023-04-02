@@ -13,7 +13,37 @@ class UI{
   void GenerateMainMenu(std::vector<std::string> &Options);
   void GenerateCharaterSelect(std::vector<std::string> &Characters);
   void GenerateEndScreen();
-void Generate_Grid(WINDOW* window, int row, int col);
+  void Generate_Grid(WINDOW* window, int row, int col);
+  void GenerateStatusWindow();
   void Clear();
+
+
+void printAsciiArtInCenter(const char* asciiArt) {
+    // Get the screen size
+    int numRows, numCols;
+    getmaxyx(stdscr, numRows, numCols);
+
+    // Split the ASCII art into lines
+    std::vector<std::string> lines;
+    std::string line;
+    for (const char* p = asciiArt; *p != '\0'; p++) {
+        if (*p == '\n') {
+            lines.push_back(line);
+            line.clear();
+        } else {
+            line += *p;
+        }
+    }
+    lines.push_back(line);
+
+    // Print the ASCII art centered on the screen
+    int rowOffset = (numRows - lines.size()) / 2 ;
+    int t = (lines[3].size())/2;
+    int colOffset = ((numCols/2) - t);
+    for (int i = 0; i < lines.size(); i++) {
+        mvprintw(rowOffset + i, colOffset,"%s",lines[i].c_str());
+    }
+}
+
 };
 #endif // UI_H
