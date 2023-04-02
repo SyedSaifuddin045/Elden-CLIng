@@ -1,6 +1,7 @@
 #include <Random.h>
 #include <Game.h>
 #include <UI.h>
+#include <curses.h>
 void UI::GeneratePlayGameUI(std::vector<std::string> Options,std::vector<std::string>INVENTORY)
 {
   GenerateWindow(Main_Window,0,0,0,0);
@@ -29,7 +30,7 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,std::vector<std::st
 
   if(Game_Window.getWindow())
   {
-    curs_set(0);
+    //curs_set(0);
     wgetch(Game_Window.getWindow());
   }
 
@@ -158,4 +159,13 @@ for (int i = 1; i < row; i += 2) {
     }
   }
 }
+  int obstacle_count = Random::Random_Number(row/2, col/2)/2;
+  mvwprintw(window,0,0, "Obstacle Count : %d",obstacle_count);
+      wattron(window,A_BOLD|COLOR_PAIR(3));
+  for (int i = 0; i < obstacle_count; i += 1) {
+    int x = Random::Random_Number(1, (row-1)/2)*2;
+    int y = Random::Random_Number(1, (col-1)/2)*2; 
+    mvwprintw(window, row_begin + x, col_begin + y, "0");
+}
+    wattroff(window, A_BOLD|COLOR_PAIR(3));
 }
