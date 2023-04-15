@@ -15,11 +15,11 @@ std::vector<std::string> Game::INVENTORY = {
 };
 
 std::vector<std::string> Game::MAIN_MENU_OPTIONS = {
-  "New Game","Exit"
+  "Continue","New Game","Exit"
 };
 
 std::vector<std::string> Game::CHARACTERS = {
-  "Character 1","Character 2","Character 3","Character 4","Character 5"
+  "Character 1","Character 2","Character 3","Character 4","Exit"
 };
 
 std::mt19937 Random::engine{std::random_device{}()};
@@ -45,3 +45,5 @@ const char* Game::Ascii_Title = R"(
                                              
 
 )";
+int Game::col_beg,Game::row_beg;
+std::vector<Game::Location> Game::Obstacle_Locations;  

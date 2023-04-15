@@ -2,9 +2,10 @@
 #include <Game.h>
 #include <UI.h>
 #include <curses.h>
-#include <string>
 void UI::GeneratePlayGameUI(std::vector<std::string> Options,std::vector<std::string>INVENTORY)
 {
+  if(Play_Game_Generated)
+    return;
   GenerateWindow(Main_Window,0,0,0,0);
 
   GenerateWindow(Actions_Window,8,COLS-2,LINES-9,1);
@@ -29,13 +30,23 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,std::vector<std::st
   Game::game_row = Random::Random_Number(5, (Game_Window.getHeight() /2 )-2 )*2;
   Game::game_col = Random::Random_Number(5, (Game_Window.getWidth() /2) -2)*2;
   Generate_Grid(Game_Window.getWindow(), Game::game_row, Game::game_col);
-
-  if(Game_Window.getWindow())
+  Game_Window.Refresh();
+  if(Actions_Window.getWindow())
   {
-    //curs_set(0);
+    curs_set(1);
+    std::string Selected = action_menu.Handle_Input();
+    if(Selected == Game::ACTION_OPTIONS[4])
+    {
+      inventory_menu.Refresh();
+      inventory_menu.Handle_Input();
+    }
+    if(Selected == Game::ACTION_OPTIONS[3])
+    {
+      MoveInGrid(2);
+    }
     wgetch(Game_Window.getWindow());
   }
-
+  Play_Game_Generated = true;
   inventory_menu.Destroy();
   action_menu.Destroy();
 }
@@ -59,16 +70,32 @@ void UI::GenerateMainMenu(std::vector<std::string> &Options){
   Menu main_menu;
   main_menu.Create(Main_Menu_Window.getWindow(), 1, 0, Main_Menu_Window.getHeight()-2, Main_Menu_Window.getWidth(), Options);
   Main_Menu_Window.setMenu(main_menu);
+  main_menu.Handle_Input();
+  std::string Selected = main_menu.Handle_Input();
+  if(Selected == "Exit")
+  {
+    mvprintw(1,0,"Exit Selected");
+  }
+  main_menu.Destroy();
 }
 
 void UI::GenerateCharaterSelect(std::vector<std::string> &Characters)
 {
+  if(Character_Select_generated)
+    return;
   Main_Menu_Window.DestroyWindow();
   GenerateWindow(Character_Select_Window, Characters.size() + 2, Characters[1].size()+3, (LINES - Characters.size()) / 2, (COLS - Characters[1].size())/2);
 
   Menu Character_menu;
   Character_menu.Create(Character_Select_Window.getWindow(), 1, 0, Character_Select_Window.getHeight()-2, Character_Select_Window.getWidth(), Characters);
   Character_Select_Window.setMenu(Character_menu);
+  Character_Select_generated = true;
+  std::string Selected = Character_menu.Handle_Input();
+  if(Selected == "Exit")
+  {
+    mvprintw(1,0,"Exit Selected");
+  }
+  Character_menu.Destroy();
 }
 
 void UI::Clear(){
@@ -81,29 +108,32 @@ void UI::Clear(){
 
 void UI::GenerateEndScreen()
 {
+  if(End_Screen_generated)
+    return;
   GenerateWindow(End_Screen,3,COLS-2,(LINES/2) - 1,1);
   std::string str = "YOU DIED !";
   End_Screen.Print_Window_Title(str);
+  End_Screen_generated = true;
 }
 
 void UI::Generate_Grid(WINDOW* window, int row, int col) {
-  int col_begin = ((Game_Window.getWidth()/2) - (col /2));
-  int row_begin = ((Game_Window.getHeight()/2) - (row/2));
+  Game::col_beg = ((Game_Window.getWidth()/2) - (col /2));
+  Game::row_beg = ((Game_Window.getHeight()/2) - (row/2));
 
   wattron(window, COLOR_PAIR(1));
 
   // Draw top and bottom borders
-  mvwhline(window, row_begin, col_begin, ACS_HLINE, col);
-  mvwhline(window, row_begin + row, col_begin, ACS_HLINE, col);
+  mvwhline(window, Game::row_beg, Game::col_beg, ACS_HLINE, col);
+  mvwhline(window, Game::row_beg + row, Game::col_beg, ACS_HLINE, col);
 
   // Draw left and right borders
-  mvwvline(window, row_begin, col_begin, ACS_VLINE, row );
-  mvwvline(window, row_begin, col_begin + col, ACS_VLINE, row);
+  mvwvline(window, Game::row_beg, Game::col_beg, ACS_VLINE, row );
+  mvwvline(window, Game::row_beg, Game::col_beg + col, ACS_VLINE, row);
 
-  mvwaddch(window, row_begin, col_begin, ACS_ULCORNER);
-  mvwaddch(window, row_begin + row, col_begin, ACS_LLCORNER);
-  mvwaddch(window, row_begin, col_begin + col, ACS_URCORNER);
-  mvwaddch(window, row_begin + row, col_begin + col, ACS_LRCORNER);
+  mvwaddch(window, Game::row_beg, Game::col_beg, ACS_ULCORNER);
+  mvwaddch(window, Game::row_beg + row, Game::col_beg, ACS_LLCORNER);
+  mvwaddch(window, Game::row_beg, Game::col_beg + col, ACS_URCORNER);
+  mvwaddch(window, Game::row_beg + row, Game::col_beg + col, ACS_LRCORNER);
 
   wattroff(window, COLOR_PAIR(1));
 
@@ -111,18 +141,18 @@ void UI::Generate_Grid(WINDOW* window, int row, int col) {
   for (int i = 1; i < row; i += 2) {
     if(i == 1 || i == row -1) {
       wattron(window, COLOR_PAIR(1));
-      mvwaddch(window, row_begin+i, col_begin, ACS_LTEE);
-      mvwhline(window, row_begin + i, col_begin + 1, ACS_HLINE, col - 2);
-      mvwaddch(window, row_begin+i, col_begin+col, ACS_RTEE);
+      mvwaddch(window, Game::row_beg+i, Game::col_beg, ACS_LTEE);
+      mvwhline(window, Game::row_beg + i, Game::col_beg + 1, ACS_HLINE, col - 2);
+      mvwaddch(window, Game::row_beg+i, Game::col_beg+col, ACS_RTEE);
       wattroff(window, COLOR_PAIR(1)); 
     }
     else {
       wattron(window, COLOR_PAIR(1));
-      mvwaddch(window, row_begin+i, col_begin, ACS_LTEE);
+      mvwaddch(window, Game::row_beg+i, Game::col_beg, ACS_LTEE);
       wattroff(window, COLOR_PAIR(1)); 
-      mvwhline(window, row_begin + i, col_begin + 1, ACS_HLINE, col - 2);
+      mvwhline(window, Game::row_beg + i, Game::col_beg + 1, ACS_HLINE, col - 2);
       wattron(window, COLOR_PAIR(1));
-      mvwaddch(window, row_begin+i, col_begin+col, ACS_RTEE);
+      mvwaddch(window, Game::row_beg+i, Game::col_beg+col, ACS_RTEE);
       wattroff(window, COLOR_PAIR(1)); 
     }
   }
@@ -131,18 +161,18 @@ void UI::Generate_Grid(WINDOW* window, int row, int col) {
   for (int i = 1; i < col; i += 2) {
     if(i == 1 || i == col -1) {
       wattron(window, COLOR_PAIR(1));
-      mvwaddch(window, row_begin, col_begin+i, ACS_TTEE);
-      mvwvline(window, row_begin + 1, col_begin + i, ACS_VLINE, row - 2);
-      mvwaddch(window, row_begin+row, col_begin+i, ACS_BTEE);
+      mvwaddch(window, Game::row_beg, Game::col_beg+i, ACS_TTEE);
+      mvwvline(window, Game::row_beg + 1, Game::col_beg + i, ACS_VLINE, row - 2);
+      mvwaddch(window, Game::row_beg+row, Game::col_beg+i, ACS_BTEE);
       wattroff(window, COLOR_PAIR(1));
     }
     else {
       wattron(window, COLOR_PAIR(1));
-      mvwaddch(window, row_begin, col_begin+i, ACS_TTEE);
+      mvwaddch(window, Game::row_beg, Game::col_beg+i, ACS_TTEE);
       wattroff(window, COLOR_PAIR(1));
-      mvwvline(window, row_begin + 1, col_begin + i, ACS_VLINE, row - 2);
+      mvwvline(window, Game::row_beg + 1, Game::col_beg + i, ACS_VLINE, row - 2);
       wattron(window, COLOR_PAIR(1));
-      mvwaddch(window, row_begin+row, col_begin+i, ACS_BTEE);
+      mvwaddch(window, Game::row_beg+row, Game::col_beg+i, ACS_BTEE);
       wattroff(window, COLOR_PAIR(1));
     }
   }
@@ -153,21 +183,25 @@ for (int i = 1; i < row; i += 2) {
     if(i == 1 || i == row-1 || j == 1 || j == col-1)
     {
       wattron(Game_Window.getWindow(), COLOR_PAIR(1));
-      mvwaddch(Game_Window.getWindow(), row_begin + i, col_begin + j, ACS_PLUS);
+      mvwaddch(Game_Window.getWindow(), Game::row_beg + i, Game::col_beg + j, ACS_PLUS);
       wattroff(Game_Window.getWindow(), COLOR_PAIR(1));
     }
     else{
-      mvwaddch(Game_Window.getWindow(), row_begin + i, col_begin + j, ACS_PLUS);
+      mvwaddch(Game_Window.getWindow(), Game::row_beg + i, Game::col_beg + j, ACS_PLUS);
     }
   }
 }
+//generate Obstacles
   int obstacle_count = Random::Random_Number(row/2, col/2)/2;
-  mvwprintw(window,0,0, "Obstacle Count : %d",obstacle_count);
       wattron(window,A_BOLD|COLOR_PAIR(3));
   for (int i = 0; i < obstacle_count; i += 1) {
-    int x = Random::Random_Number(1, (row-1)/2)*2;
-    int y = Random::Random_Number(1, (col-1)/2)*2; 
-    mvwprintw(window, row_begin + x, col_begin + y, "0");
+    int x = Random::Random_Number(1, (col-1)/2)*2;
+    int y = Random::Random_Number(1, (row-1)/2)*2; 
+    Game::Location L;
+    L.x=Game::col_beg + x;
+    L.y = Game::row_beg+ y;
+    Game::Obstacle_Locations.push_back(L);
+    mvwprintw(window, Game::row_beg + y, Game::col_beg + x, "0");
 }
     wattroff(window, A_BOLD|COLOR_PAIR(3));
 }
@@ -211,4 +245,48 @@ void UI::GenerateStatusWindow()
   mvwprintw(Status_Window.getWindow(),beg_x+6,w_max_x-E.size()-1,"%s", E.c_str());
   wattroff(Status_Window.getWindow(), COLOR_PAIR(4));
   Status_Window.Refresh();
+}
+void UI::MoveInGrid(int increment)
+{
+ int c; 
+ int cur_X=Game::col_beg+2,cur_Y=Game::row_beg+2;
+    Game::Location CurrentLocation;
+    CurrentLocation.y = cur_Y;
+    CurrentLocation.x = cur_X;
+  while((c = wgetch(Game_Window.getWindow()))!=10)
+  {
+    switch (c) {
+    case KEY_DOWN:
+      if(cur_Y+increment>=Game::row_beg+2 && cur_Y+increment<=Game::row_beg+Game::game_row-2 && Game::isObstacleLocation({CurrentLocation.x,CurrentLocation.y+increment}) == false)
+      {
+        cur_Y += increment;
+        CurrentLocation.y = cur_Y;
+      }
+      break;
+    case KEY_UP:
+      if(cur_Y - increment>=Game::row_beg+2 && cur_Y<=Game::row_beg+Game::game_row-2&& Game::isObstacleLocation({CurrentLocation.x,CurrentLocation.y-increment}) ==false)
+      {
+        cur_Y -= increment;
+        CurrentLocation.y =cur_Y;
+      }
+      break;
+    case KEY_RIGHT:
+      if(cur_X+increment>=Game::col_beg+2 && cur_X+increment<=Game::col_beg+Game::game_col-2&& Game::isObstacleLocation({CurrentLocation.x+increment,CurrentLocation.y}) == false)
+      {
+        cur_X += increment;
+        CurrentLocation.x =cur_X;
+      }
+      break;
+    case KEY_LEFT:
+      if(cur_X-increment>=Game::col_beg+2 && cur_X-increment<=Game::col_beg+Game::game_col-2&& Game::isObstacleLocation({CurrentLocation.x-increment,CurrentLocation.y}) == false)
+      {
+        cur_X -= increment;
+        CurrentLocation.x =cur_X;
+      }
+      break;
+    }
+    mvwprintw(Game_Window.getWindow(),0, 0, "Current Position = %d , %d and isObstacleLocation = %d",CurrentLocation.y,CurrentLocation.x,Game::isObstacleLocation(CurrentLocation));
+    wmove(Game_Window.getWindow(), CurrentLocation.y, CurrentLocation.x);
+    Game_Window.Refresh();
+  }
 }

@@ -36,7 +36,31 @@ public:
 
     wrefresh(window);
   }
-
+  std::string Handle_Input()
+  {
+    int c;
+    while((c=wgetch(window)) != KEY_F(1))
+    {
+    switch (c) {
+      case KEY_DOWN:
+        menu_driver(menu, REQ_DOWN_ITEM);
+        wrefresh(window);
+        break;
+      case KEY_UP:
+        menu_driver(menu, REQ_UP_ITEM);
+        wrefresh(window);
+        break;
+      case 10:
+      case KEY_ENTER:
+        int selected_index = GetSelectedIndex();
+        mvprintw(0, 0, "Select Item = %s",item_name(items[selected_index]));
+        wrefresh(window);
+        return item_name(items[selected_index]);
+        break;
+    }
+    }
+    return item_name(items[0]);
+  }
   void Destroy() {
     if (menu != nullptr) {
       unpost_menu(menu);
