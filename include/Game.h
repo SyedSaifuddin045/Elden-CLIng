@@ -1,5 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
+#include "Player.h"
 #include <Initialize.h>
 #include <UI.h>
 #include <algorithm>
@@ -9,6 +10,7 @@
 class Game {
 public:
   static std::vector<std::string> ACTION_OPTIONS;
+  static Player player;
   struct Location {
     int x, y;
   };
@@ -37,6 +39,11 @@ public:
       }
     }
     return false;
+  }
+  static void ExitGame()
+  {
+    Initialize::UnInitialize();
+    std::exit(0);
   }
 };
 #endif // !GAME_H

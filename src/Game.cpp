@@ -15,7 +15,7 @@ std::vector<std::string> Game::INVENTORY = {
 };
 
 std::vector<std::string> Game::MAIN_MENU_OPTIONS = {
-  "Continue","New Game","Exit"
+  "Load","New Game","Exit"
 };
 
 std::vector<std::string> Game::CHARACTERS = {
@@ -47,3 +47,4 @@ const char* Game::Ascii_Title = R"(
 )";
 int Game::col_beg,Game::row_beg;
 std::vector<Game::Location> Game::Obstacle_Locations;  
+Player Game::player = Player::getInstance();

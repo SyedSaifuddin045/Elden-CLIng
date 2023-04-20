@@ -6,7 +6,7 @@
 
 class UI{
   private:
-  Window Main_Window,Actions_Window,Inventory_Window,Status_Window,Game_Window,Main_Menu_Window,Character_Select_Window,End_Screen;
+  Window New_Game_Window,Main_Window,Actions_Window,Inventory_Window,Status_Window,Game_Window,Main_Menu_Window,Character_Select_Window,End_Screen;
   int input;
   bool Title_generated,Main_Menu_generated,Character_Select_generated,Play_Game_Generated,End_Screen_generated=false;
   public:
@@ -49,5 +49,6 @@ void printAsciiArtInCenter(const char* asciiArt) {
     }
 }
 void MoveInGrid(int increment);
+void EnterPlayerDetails();
 };
 #endif // UI_H

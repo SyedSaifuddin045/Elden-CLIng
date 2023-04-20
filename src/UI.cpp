@@ -1,6 +1,7 @@
 #include <Random.h>
 #include <Game.h>
 #include <UI.h>
+#include <cstdlib>
 #include <curses.h>
 void UI::GeneratePlayGameUI(std::vector<std::string> Options,std::vector<std::string>INVENTORY)
 {
@@ -70,13 +71,24 @@ void UI::GenerateMainMenu(std::vector<std::string> &Options){
   Menu main_menu;
   main_menu.Create(Main_Menu_Window.getWindow(), 1, 0, Main_Menu_Window.getHeight()-2, Main_Menu_Window.getWidth(), Options);
   Main_Menu_Window.setMenu(main_menu);
-  main_menu.Handle_Input();
   std::string Selected = main_menu.Handle_Input();
   if(Selected == "Exit")
   {
-    mvprintw(1,0,"Exit Selected");
+    main_menu.Destroy();
+    Game::ExitGame();
   }
-  main_menu.Destroy();
+  if(Selected == "Load")
+  {
+    main_menu.Destroy();
+    Game::game_state = Game::Character_Select;
+  }
+  if(Selected == "New Game")
+  {
+    main_menu.Destroy();
+    Main_Menu_Window.DestroyWindow();
+    UI::EnterPlayerDetails();
+    Game::game_state = Game::Play_Game;
+  }
 }
 
 void UI::GenerateCharaterSelect(std::vector<std::string> &Characters)
@@ -93,7 +105,7 @@ void UI::GenerateCharaterSelect(std::vector<std::string> &Characters)
   std::string Selected = Character_menu.Handle_Input();
   if(Selected == "Exit")
   {
-    mvprintw(1,0,"Exit Selected");
+    Game::ExitGame();
   }
   Character_menu.Destroy();
 }
@@ -289,4 +301,24 @@ void UI::MoveInGrid(int increment)
     wmove(Game_Window.getWindow(), CurrentLocation.y, CurrentLocation.x);
     Game_Window.Refresh();
   }
+}
+
+void UI::EnterPlayerDetails()
+{
+  std::string str = "Enter Your Name :";
+  GenerateWindow(New_Game_Window,5,COLS-4,(LINES - New_Game_Window.getHeight())/2,2);
+  New_Game_Window.Print_Window_Title(str);
+  echo();
+  curs_set(2);
+  wattron(New_Game_Window.getWindow(),A_BLINK);
+  New_Game_Window.Refresh();
+  char name[50];
+  mvwgetstr(New_Game_Window.getWindow(), 3, 1, name);
+  noecho();
+  Game::player.setName(std::string(name));
+  mvprintw(1, 0, "Player name : %s",Game::player.getName().c_str());
+  wattroff(New_Game_Window.getWindow(),A_BLINK);
+  refresh();
+  getch();
+  New_Game_Window.DestroyWindow();
 }
