@@ -1,3 +1,4 @@
+#include "Json.h"
 #include <Game.h>
 #include <Random.h>
 #include <string>
@@ -18,9 +19,7 @@ std::vector<std::string> Game::MAIN_MENU_OPTIONS = {
   "Load","New Game","Exit"
 };
 
-std::vector<std::string> Game::CHARACTERS = {
-  "Character 1","Character 2","Character 3","Character 4","Exit"
-};
+std::vector<std::string> Game::CHARACTERS = Json::GetAllJson(".");
 
 std::mt19937 Random::engine{std::random_device{}()};
 int Game::game_row,Game::game_col;

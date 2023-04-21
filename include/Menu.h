@@ -109,6 +109,7 @@ public:
   {
     menu_opts_off(menu,M_Option);
   }
+  MENU* getMENU(){return menu;}
 };
 
 #endif // MENU_H

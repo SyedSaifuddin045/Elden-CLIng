@@ -26,7 +26,8 @@ public:
   }
   void Refresh() { wrefresh(window); }
   void Print_Window_Title(std::string &Title) {
-    int start_y, start_x, max_y, max_x, title_length = Title.size();
+    int start_y, start_x, max_y, max_x; 
+    int title_length = Title.size();
 
     getbegyx(window, start_y, start_x);
     getmaxyx(window, max_y, max_x);

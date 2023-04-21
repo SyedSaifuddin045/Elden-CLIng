@@ -2,12 +2,14 @@
 #define JSON_H
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 #include <string>
+#include <vector>
 
 //Extension of rapidjson
 namespace rapidjson {
@@ -39,6 +41,23 @@ class Json{
   //blank constructor for now,may be needed for some other stuff ahead
   Json()
   {
+  }
+  //Function to get all Json files in the path
+  static std::vector<std::string> GetAllJson(std::string path)
+  {
+    namespace fs = std::filesystem;
+    std::vector<std::string> json_files;
+    const std::string extension = ".json";
+    for(const auto& file : fs::directory_iterator(path))
+    {
+      if(file.path().extension() == extension)
+      {
+        std::string file_name = file.path().filename().string(); 
+        file_name.erase(file_name.size() - extension.size());
+        json_files.push_back(file_name);
+      }
+    }
+    return json_files;
   }
   //Simply call with path to read from and stores info in Json::document
   void Read(std::string path)
