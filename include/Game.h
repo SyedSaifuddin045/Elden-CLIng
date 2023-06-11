@@ -1,5 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
+#include "Item.h"
 #include "Player.h"
 #include <Initialize.h>
 #include <UI.h>
@@ -14,7 +15,7 @@ public:
   struct Location {
     int x, y;
   };
-  static std::vector<std::string> INVENTORY;
+  static std::vector<Item> INVENTORY;
   static std::vector<std::string> MAIN_MENU_OPTIONS;
   static std::vector<std::string> CHARACTERS;
   static int game_row, game_col, row_beg, col_beg;

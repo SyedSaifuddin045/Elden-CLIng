@@ -4,7 +4,7 @@ int main(int argc, char *argv[]) {
   Initialize();
   bool isCharacterMenu = false;
   Game::game_state = Game::GameState::Game_Title;
-
+  std::vector<std::string> Inventory_items;
   while (Game::game_state != Game::GameState::End_Game) {
     switch (Game::game_state) {
     case Game::Game_Title:
@@ -21,13 +21,17 @@ int main(int argc, char *argv[]) {
       break;
     case Game::Play_Game:
       Game::ui.Clear();
-      Game::ui.GeneratePlayGameUI(Game::ACTION_OPTIONS, Game::INVENTORY);
+      Game::INVENTORY = Game::player.getInventory();
+      for (const auto &item : Game::INVENTORY) {
+        Inventory_items.push_back(item.Name);
+      }
+      Game::ui.GeneratePlayGameUI(Game::ACTION_OPTIONS, Inventory_items);
       Game::game_state = Game::GameState::End_Screen;
       break;
     case Game::Character_Select:
       Game::ui.Clear();
       Game::ui.GenerateCharaterSelect(Game::CHARACTERS);
-      getch();
+      // getch();
       Game::game_state = Game::GameState::Play_Game;
       break;
 

@@ -1,18 +1,22 @@
 #include "Json.h"
+#include "Stats.h"
 #include <Game.h>
 #include <Random.h>
 #include <UI.h>
+#include <curses.h>
 #include <menu.h>
+#include <vector>
 void UI::GeneratePlayGameUI(std::vector<std::string> Options,
                             std::vector<std::string> INVENTORY) {
   if (Play_Game_Generated)
     return;
+  int action_menu_width = 12;
   GenerateWindow(Main_Window, 0, 0, 0, 0);
 
   GenerateWindow(Actions_Window, 8, COLS - 2, LINES - 9, 1);
 
   Menu action_menu;
-  action_menu.Create(Actions_Window.getWindow(), 1, 1, 6, 20, Options);
+  action_menu.Create(Actions_Window.getWindow(), 1, 1, 6, action_menu_width, Options);
   Actions_Window.setMenu(action_menu);
   GenerateWindow(Inventory_Window, LINES - (Actions_Window.getHeight()) - 2, 20,
                  1, 1);
@@ -44,6 +48,8 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
   Game_Window.Refresh();
   if (Actions_Window.getWindow()) {
     curs_set(1);
+    while(Game::player.getStats().current_HP != 0)
+    {
     std::string Selected = action_menu.Handle_Input();
     if (Selected == Game::ACTION_OPTIONS[4]) {
       inventory_menu.Refresh();
@@ -52,7 +58,22 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
     if (Selected == Game::ACTION_OPTIONS[3]) {
       MoveInGrid(2);
     }
-    wgetch(Game_Window.getWindow());
+    if(Selected == Game::ACTION_OPTIONS[0])
+    {
+      std::unordered_map<std::string,std::string> Attack_Options = {{"R - LIGHT","25"},{"R - HEAVY","35"},{"L - LIGHT","15"},{"L - HEAVY","35"},{"BACK","0"}};
+      Menu attack_menu;
+      attack_menu.Create(Actions_Window.getWindow(),1 , 1+action_menu_width, 7, 16, Attack_Options);
+      attack_menu.Refresh();
+      std::string attack_select = attack_menu.Handle_Input();
+      attack_menu.Destroy();
+      wattron(Actions_Window.getWindow(),COLOR_PAIR(1));
+      Actions_Window.Box(0, 0);
+      wattroff(Actions_Window.getWindow(),COLOR_PAIR(1));
+      action_menu.Refresh();
+      Actions_Window.Refresh();
+    }
+    }
+    //wgetch(Game_Window.getWindow());
   }
   Play_Game_Generated = true;
   inventory_menu.Destroy();
@@ -96,6 +117,10 @@ void UI::GenerateMainMenu(std::vector<std::string> &Options) {
     main_menu.Destroy();
     Main_Menu_Window.DestroyWindow();
     UI::EnterPlayerDetails();
+    Stats newPlayerStat;
+    newPlayerStat.max_HP = 75;
+    newPlayerStat.current_HP = 75;
+    Game::player.setStats(newPlayerStat);
     Game::game_state = Game::Play_Game;
   }
 }
@@ -290,6 +315,7 @@ void UI::MoveInGrid(int increment) {
   Game::Location CurrentLocation;
   CurrentLocation.y = cur_Y;
   CurrentLocation.x = cur_X;
+  wmove(Game_Window.getWindow(), CurrentLocation.y, CurrentLocation.x);
   while ((c = wgetch(Game_Window.getWindow())) != 10) {
     switch (c) {
     case KEY_DOWN:
@@ -329,10 +355,7 @@ void UI::MoveInGrid(int increment) {
       }
       break;
     }
-    mvwprintw(Game_Window.getWindow(), 0, 0,
-              "Current Position = %d , %d and isObstacleLocation = %d",
-              CurrentLocation.y, CurrentLocation.x,
-              Game::isObstacleLocation(CurrentLocation));
+    //mvwprintw(Game_Window.getWindow(), 0, 0,"Current Position = %d , %d and isObstacleLocation = %d",CurrentLocation.y, CurrentLocation.x,Game::isObstacleLocation(CurrentLocation));
     wmove(Game_Window.getWindow(), CurrentLocation.y, CurrentLocation.x);
     Game_Window.Refresh();
   }
@@ -351,9 +374,9 @@ void UI::EnterPlayerDetails() {
   mvwgetstr(New_Game_Window.getWindow(), 3, 1, name);
   noecho();
   Game::player.setName(std::string(name));
-  mvprintw(1, 0, "Player name : %s", Game::player.getName().c_str());
+  //mvprintw(1, 0, "Player name : %s", Game::player.getName().c_str());
   wattroff(New_Game_Window.getWindow(), A_BLINK);
   refresh();
-  getch();
+  //getch();
   New_Game_Window.DestroyWindow();
 }

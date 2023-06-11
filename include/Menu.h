@@ -3,6 +3,8 @@
 
 #include <menu.h>
 #include <ncurses.h>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 #include <string>
 
@@ -36,31 +38,70 @@ public:
 
     wrefresh(window);
   }
-  std::string Handle_Input()
+  void Create(WINDOW *win,int y,int x,int height,int width,std::unordered_map<std::string, std::string> options)
   {
-    int c;
-    while((c=wgetch(window)) != KEY_F(1))
-    {
-    switch (c) {
-      case KEY_DOWN:
-        menu_driver(menu, REQ_DOWN_ITEM);
-        wrefresh(window);
-        break;
-      case KEY_UP:
-        menu_driver(menu, REQ_UP_ITEM);
-        wrefresh(window);
-        break;
-      case 10:
-      case KEY_ENTER:
-        int selected_index = GetSelectedIndex();
-        mvprintw(0, 0, "Select Item = %s",item_name(items[selected_index]));
-        wrefresh(window);
-        return item_name(items[selected_index]);
-        break;
+    //TODO:Create overload function to show stamina consumption in attacks
+    if(options.empty())
+      return;
+    window = derwin(win, height, width, y, x);
+    keypad(window,true);
+    for (auto& option : options) {
+      items.push_back(new_item(option.first.c_str(),option.second.c_str()));
     }
-    }
-    return item_name(items[0]);
+    items.push_back(nullptr);
+
+    menu = new_menu(items.data());
+    set_menu_win(menu, window);
+    set_menu_sub(menu, derwin(window, height, width - 2, 0, 1));
+    set_menu_format(menu, height, 1);
+    post_menu(menu);
+
+    wrefresh(window);
   }
+std::string Handle_Input()
+{
+    int c;
+    while ((c = wgetch(window)) != KEY_F(1)) {
+        switch (c) {
+            case KEY_DOWN:
+                menu_driver(menu, REQ_DOWN_ITEM);
+                break;
+            case KEY_UP:
+                menu_driver(menu, REQ_UP_ITEM);
+                break;
+            case 10:
+            case KEY_ENTER:
+                int selected_index = GetSelectedIndex();
+                wrefresh(window);
+                mvprintw(1, 1, "%d",selected_index);
+                return item_name(menu->items[selected_index]);
+        }
+        wrefresh(window);
+    }
+    return item_name(menu->items[0]);
+}
+// void Handle_Input_new()
+// {
+//   int c;
+//   while((c=wgetch(window) != KEY_F(1)))
+//   {
+//     switch (c) {
+//     case KEY_DOWN:
+//       menu_driver(menu, REQ_DOWN_ITEM);
+//       break;
+    
+//     case KEY_UP:
+//       menu_driver(menu,REQ_UP_ITEM);
+//       break;
+//       case 10:
+//       case KEY_ENTER:
+//       int selected_index = GetSelectedIndex();
+//       wrefresh(window);
+//       //return item_name(menu->items)
+//     }
+//     wrefresh(window);
+//   }
+// }
   void Destroy() {
     if (menu != nullptr) {
       unpost_menu(menu);
