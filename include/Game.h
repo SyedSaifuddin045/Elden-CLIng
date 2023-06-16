@@ -1,5 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
+#include "Enemy.h"
 #include "Item.h"
 #include "Player.h"
 #include <Initialize.h>
@@ -12,13 +13,12 @@ class Game {
 public:
   static std::vector<std::string> ACTION_OPTIONS;
   static Player player;
-  struct Location {
-    int x, y;
-  };
   static std::vector<Item> INVENTORY;
   static std::vector<std::string> MAIN_MENU_OPTIONS;
   static std::vector<std::string> CHARACTERS;
   static int game_row, game_col, row_beg, col_beg;
+  static std::vector<std::string> Enemy_list;
+  static Enemy current_Enemy;
   enum GameState {
     Game_Title,
     Main_Menu,
@@ -31,7 +31,7 @@ public:
   static UI ui;
   static const char *Ascii_Title;
   static std::vector<Location> Obstacle_Locations;
-  static bool isObstacleLocation(Game::Location L) {
+  static bool isObstacleLocation(Location& L) {
     for (Location OL : Game::Obstacle_Locations) 
     {
       if (L.x == OL.x && L.y == OL.y)

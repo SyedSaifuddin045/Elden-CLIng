@@ -1,10 +1,13 @@
+#include "Enemy.h"
 #include "Json.h"
+#include "Location.h"
 #include "Stats.h"
 #include <Game.h>
 #include <Random.h>
 #include <UI.h>
 #include <curses.h>
 #include <menu.h>
+#include <string>
 #include <vector>
 void UI::GeneratePlayGameUI(std::vector<std::string> Options,
                             std::vector<std::string> INVENTORY) {
@@ -24,15 +27,19 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
   Menu inventory_menu;
   inventory_menu.Create(Inventory_Window.getWindow(), 3, 1,
                         Inventory_Window.getHeight() - 4,
-                        Inventory_Window.getWidth() - 2, INVENTORY);
+                        Inventory_Window.getWidth()-1, INVENTORY);
   Inventory_Window.setMenu(inventory_menu);
 
   std::string str = "INVENTORY";
   Inventory_Window.Print_Window_Title(str);
 
-  GenerateWindow(Status_Window, 9, COLS - (Inventory_Window.getWidth()) - 2, 1,
+  GenerateWindow(Status_Window, 11, COLS - (Inventory_Window.getWidth()) - 2, 1,
                  (Inventory_Window.getWidth() + 1));
-  GenerateStatusWindow();
+  int enemy_index = Random::Random_Number(0, Game::Enemy_list.size() - 1);
+  Location Zero_Location = {0,0};
+  Stats Zero_Stats = Stats();
+  Enemy enemy =  Enemy(Game::Enemy_list[enemy_index],Zero_Stats,Zero_Location,Game::player.getLevel()) ;
+  Game::current_Enemy = enemy;
 
   GenerateWindow(
       Game_Window,
@@ -44,7 +51,9 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
       Random::Random_Number(5, (Game_Window.getHeight() / 2) - 2) * 2;
   Game::game_col =
       Random::Random_Number(5, (Game_Window.getWidth() / 2) - 2) * 2;
+
   Generate_Grid(Game_Window.getWindow(), Game::game_row, Game::game_col);
+  GenerateStatusWindow();
   Game_Window.Refresh();
   if (Actions_Window.getWindow()) {
     curs_set(1);
@@ -76,7 +85,6 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
     //wgetch(Game_Window.getWindow());
   }
   Play_Game_Generated = true;
-  inventory_menu.Destroy();
   action_menu.Destroy();
 }
 
@@ -255,13 +263,30 @@ void UI::Generate_Grid(WINDOW *window, int row, int col) {
   for (int i = 0; i < obstacle_count; i += 1) {
     int x = Random::Random_Number(1, (col - 1) / 2) * 2;
     int y = Random::Random_Number(1, (row - 1) / 2) * 2;
-    Game::Location L;
+    Location L;
     L.x = Game::col_beg + x;
     L.y = Game::row_beg + y;
     Game::Obstacle_Locations.push_back(L);
     mvwprintw(window, Game::row_beg + y, Game::col_beg + x, "0");
   }
   wattroff(window, A_BOLD | COLOR_PAIR(3));
+  
+  Game::player.setPlayerLocation(1,Random::Random_Number(1, (Game::game_row-1) / 2));
+  if(! Game::isObstacleLocation(Game::player.getPlayerLocation()))
+  {
+    wattron(Game_Window.getWindow(), COLOR_PAIR(5));
+    mvwprintw(window,Game::row_beg+(Game::player.getPlayerLocation().y * 2),Game::col_beg+Game::player.getPlayerLocation().x + 1,"P");
+    wattroff(Game_Window.getWindow(), COLOR_PAIR(5));
+  }
+
+  //Game::current_Enemy.setEnemyLocation(Game::game_col - 2,Random::Random_Number(1, ((Game::game_row - 1) /2) ) * 2);
+  Game::current_Enemy.setEnemyLocation((Game::game_col-2) / 2,Random::Random_Number(1, (Game::game_row-1) / 2));
+  if(! Game::isObstacleLocation(Game::current_Enemy.getEnemyLocation()))
+  {
+    wattron(Game_Window.getWindow(), COLOR_PAIR(6));
+    mvwprintw(window,Game::row_beg + (Game::current_Enemy.getEnemyLocation().y * 2), Game::col_beg + Game::current_Enemy.getEnemyLocation().x * 2, "E");
+    wattroff(Game_Window.getWindow(), COLOR_PAIR(6));
+  }
 }
 
 void UI::GenerateStatusWindow() {
@@ -291,65 +316,71 @@ void UI::GenerateStatusWindow() {
              ACS_CKBOARD);
     j += 1;
   }
-  int Player_Level = 100;
   E = "LEVEL:[" + std::to_string(Game::player.getLevel()) + "]";
   mvwprintw(Status_Window.getWindow(), beg_y + 6, beg_x, "%s", E.c_str());
-  E = "ENEMY :";
+  E = "PLAYER LOCATION : x = "+std::to_string(Game::player.getPlayerLocation().x) + ", y = "+ std::to_string(Game::player.getPlayerLocation().y);
+  mvwprintw(Status_Window.getWindow(), beg_y+8, beg_x, "%s",E.c_str());
+  E = "ENEMY :" + Game::current_Enemy.getEnemyName();
   mvwprintw(Status_Window.getWindow(), beg_x, w_max_x - E.size() - 1, "%s",
             E.c_str());
-  E = "HP :";
+
+  Stats Enemy_Stats = Game::current_Enemy.getEnemyStats();
+  E = "HP :[" + std::to_string(Enemy_Stats.current_HP) +"/" + std::to_string(Enemy_Stats.max_HP) +"]";
   mvwprintw(Status_Window.getWindow(), beg_x + 2, w_max_x - E.size() - 1, "%s",
             E.c_str());
-  E = "STAMINA :";
+  E = "STAMINA : [" + std::to_string(Enemy_Stats.current_Stamina) +"/" +  std::to_string(Enemy_Stats.max_Stamina)+"]";
   mvwprintw(Status_Window.getWindow(), beg_x + 4, w_max_x - E.size() - 1, "%s",
             E.c_str());
-  E = "LEVEL : ";
+  E = "LEVEL : " + std::to_string(Game::current_Enemy.getLevel());
   mvwprintw(Status_Window.getWindow(), beg_x + 6, w_max_x - E.size() - 1, "%s",
             E.c_str());
+  E = "ENEMY LOCATION : x = "+std::to_string(Game::current_Enemy.getEnemyLocation().x) + ", y = "+ std::to_string(Game::current_Enemy.getEnemyLocation().y);
+  mvwprintw(Status_Window.getWindow(), beg_y+8, w_max_x - E.size() - 1, "%s",E.c_str());
   wattroff(Status_Window.getWindow(), COLOR_PAIR(4));
   Status_Window.Refresh();
 }
 void UI::MoveInGrid(int increment) {
   int c;
   int cur_X = Game::col_beg + 2, cur_Y = Game::row_beg + 2;
-  Game::Location CurrentLocation;
+  Location CurrentLocation;
   CurrentLocation.y = cur_Y;
   CurrentLocation.x = cur_X;
   wmove(Game_Window.getWindow(), CurrentLocation.y, CurrentLocation.x);
   while ((c = wgetch(Game_Window.getWindow())) != 10) {
+    Location newLocation;
     switch (c) {
     case KEY_DOWN:
+      newLocation = {CurrentLocation.x, CurrentLocation.y - increment};
       if (cur_Y + increment >= Game::row_beg + 2 &&
           cur_Y + increment <= Game::row_beg + Game::game_row - 2 &&
-          Game::isObstacleLocation(
-              {CurrentLocation.x, CurrentLocation.y + increment}) == false) {
+          Game::isObstacleLocation(newLocation) == false) {
         cur_Y += increment;
         CurrentLocation.y = cur_Y;
       }
       break;
     case KEY_UP:
+      newLocation = {CurrentLocation.x, CurrentLocation.y - increment};
       if (cur_Y - increment >= Game::row_beg + 2 &&
           cur_Y <= Game::row_beg + Game::game_row - 2 &&
-          Game::isObstacleLocation(
-              {CurrentLocation.x, CurrentLocation.y - increment}) == false) {
+          Game::isObstacleLocation(newLocation) == false) {
         cur_Y -= increment;
         CurrentLocation.y = cur_Y;
       }
       break;
     case KEY_RIGHT:
+      newLocation = {CurrentLocation.x + increment, CurrentLocation.y};
       if (cur_X + increment >= Game::col_beg + 2 &&
           cur_X + increment <= Game::col_beg + Game::game_col - 2 &&
-          Game::isObstacleLocation(
-              {CurrentLocation.x + increment, CurrentLocation.y}) == false) {
+          Game::isObstacleLocation(newLocation) == false) {
         cur_X += increment;
         CurrentLocation.x = cur_X;
       }
       break;
     case KEY_LEFT:
+      newLocation = {CurrentLocation.x - increment, CurrentLocation.y};
       if (cur_X - increment >= Game::col_beg + 2 &&
           cur_X - increment <= Game::col_beg + Game::game_col - 2 &&
-          Game::isObstacleLocation(
-              {CurrentLocation.x - increment, CurrentLocation.y}) == false) {
+          Game::isObstacleLocation(newLocation) == false) {
         cur_X -= increment;
         CurrentLocation.x = cur_X;
       }

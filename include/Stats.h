@@ -1,11 +1,31 @@
 #ifndef STATS_H
 #define STATS_H
 #include <Json.h>
+#include <Random.h>
 class Stats {
 public:
   Stats()
     :max_HP(0),max_Stamina(0),current_HP(0),current_Stamina(0),Attack(0),Defense(0),HP_regain(0),Stamina_regain(0)
   {}
+  void generateRandomStats(int level)
+  {
+    int seed = Random::Random_Number(1, level);
+
+    int R_Max_HP = Random::Random_Number(seed*1,seed * level);
+    max_HP = R_Max_HP;
+    int R_max_stamina = Random::Random_Number(seed*1,seed * level) ;
+    max_Stamina = R_max_stamina;
+    int R_Attack = Random::Random_Number(seed*1,seed * level) ;
+    Attack = R_Attack;
+    int R_Defense = Random::Random_Number(seed*1,seed * level) ;
+    Defense = R_Defense;
+    int R_HP_regain = Random::Random_Number(seed*1,seed * level) ;
+    HP_regain = R_HP_regain;
+    int R_Stamina_regain = Random::Random_Number(seed*1,seed * level);
+    Stamina_regain = R_Stamina_regain;
+    current_HP = max_HP;
+    current_Stamina = max_Stamina;
+  }
   int max_HP;
   int max_Stamina;
   int current_HP;

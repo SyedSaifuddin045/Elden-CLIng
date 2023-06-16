@@ -1,15 +1,17 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+#include "Location.h"
 #include <Item.h>
 #include <string>
 #include <Stats.h>
 #include <vector>
 #include <unordered_map>
 #include <Json.h>
-class Player {
+#include <Enemy.h>
+
+class Player : Entitiy {
 public:
-  static Player &getInstance() {
-    static Player instance;
+  static Player& getInstance() {
     return instance;
   }
 
@@ -32,6 +34,19 @@ public:
   std::vector<Item> getInventory() const { return Inventory; }
 
   std::unordered_map<Slot, Item> getEquipment() const { return Equipment; }
+
+  void setPlayerLocation(int x, int y)
+  {
+    Entitiy::setLocation(x,y);
+  }
+  void setPlayerLocation(Location& L)
+  {
+    Entitiy::setLocation(L);
+  }
+  Location& getPlayerLocation()
+  {
+    return Entitiy::getLocation();
+  }
 
   Item getItemInSlot(const Slot &slot) const {
     if (Equipment.count(slot) > 0) {
@@ -105,10 +120,14 @@ public:
   }
 
 private:
-  std::string Name;
+  Player(std::string _Name,Stats _stats,Location _location)
+    :Entitiy(_Name,_stats,_location )
+  {
+    
+  }
   int level;
-  Stats stat;
   std::vector<Item> Inventory;
   std::unordered_map<Slot, Item> Equipment;
+  static Player instance;
 };
 #endif // !PLAYER_H
