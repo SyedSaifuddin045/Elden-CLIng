@@ -20,7 +20,7 @@ class UI{
   void Clear();
   void GetInput();
   friend class Game;
-
+  void UpdatePlayerandEnemyPos();
 
 void printAsciiArtInCenter(const char* asciiArt) {
     // Get the screen size

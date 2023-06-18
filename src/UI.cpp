@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "Player.h"
 #include "Json.h"
 #include "Location.h"
 #include "Stats.h"
@@ -81,6 +82,10 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
       action_menu.Refresh();
       Actions_Window.Refresh();
     }
+    Game::current_Enemy.Turn(Game::player);
+    GenerateStatusWindow();
+    UpdatePlayerandEnemyPos();
+    Game_Window.Refresh();
     }
     //wgetch(Game_Window.getWindow());
   }
@@ -270,16 +275,17 @@ void UI::Generate_Grid(WINDOW *window, int row, int col) {
     mvwprintw(window, Game::row_beg + y, Game::col_beg + x, "0");
   }
   wattroff(window, A_BOLD | COLOR_PAIR(3));
-  
+  Game::player.setPreviousLocation(Game::player.getLocation()); 
   Game::player.setPlayerLocation(1,Random::Random_Number(1, (Game::game_row-1) / 2));
   if(! Game::isObstacleLocation(Game::player.getPlayerLocation()))
   {
-    wattron(Game_Window.getWindow(), COLOR_PAIR(5));
+    wattron(Game_Window.getWindow(), COLOR_PAIR(5) | A_BLINK | A_BOLD);
     mvwprintw(window,Game::row_beg+(Game::player.getPlayerLocation().y * 2),Game::col_beg+Game::player.getPlayerLocation().x + 1,"P");
-    wattroff(Game_Window.getWindow(), COLOR_PAIR(5));
+    wattroff(Game_Window.getWindow(), COLOR_PAIR(5) | A_BLINK | A_BOLD);
   }
 
   //Game::current_Enemy.setEnemyLocation(Game::game_col - 2,Random::Random_Number(1, ((Game::game_row - 1) /2) ) * 2);
+  Game::current_Enemy.setPreviousLocation(Game::current_Enemy.getLocation());
   Game::current_Enemy.setEnemyLocation((Game::game_col-2) / 2,Random::Random_Number(1, (Game::game_row-1) / 2));
   if(! Game::isObstacleLocation(Game::current_Enemy.getEnemyLocation()))
   {
@@ -287,6 +293,29 @@ void UI::Generate_Grid(WINDOW *window, int row, int col) {
     mvwprintw(window,Game::row_beg + (Game::current_Enemy.getEnemyLocation().y * 2), Game::col_beg + Game::current_Enemy.getEnemyLocation().x * 2, "E");
     wattroff(Game_Window.getWindow(), COLOR_PAIR(6));
   }
+}
+
+void UI::UpdatePlayerandEnemyPos() {
+    // Clear previous player position
+    mvwprintw(Game_Window.getWindow(), Game::row_beg + (Game::player.getPreviousLocation().y * 2), Game::col_beg + Game::player.getPreviousLocation().x + 1, " ");
+
+    // Clear previous enemy position
+    mvwprintw(Game_Window.getWindow(), Game::row_beg + (Game::current_Enemy.getPreviousLocation().y * 2), Game::col_beg + Game::current_Enemy.getPreviousLocation().x * 2, " ");
+
+    // Update player position
+    wattron(Game_Window.getWindow(), COLOR_PAIR(5) | A_BLINK | A_BOLD);
+    mvwprintw(Game_Window.getWindow(), Game::row_beg + (Game::player.getPlayerLocation().y * 2), Game::col_beg + Game::player.getPlayerLocation().x + 1, "P");
+    wattroff(Game_Window.getWindow(), COLOR_PAIR(5) | A_BLINK | A_BOLD);
+    Game::player.setPlayerLocation(Game::player.getLocation());
+
+    // Update enemy position
+    wattron(Game_Window.getWindow(), COLOR_PAIR(6));
+    mvwprintw(Game_Window.getWindow(), Game::row_beg + (Game::current_Enemy.getEnemyLocation().y * 2), Game::col_beg + Game::current_Enemy.getEnemyLocation().x * 2, "E");
+    wattroff(Game_Window.getWindow(), COLOR_PAIR(6));
+    Game::current_Enemy.setPreviousLocation(Game::current_Enemy.getLocation());
+
+    // Refresh the window to display the changes
+    wrefresh(Game_Window.getWindow());
 }
 
 void UI::GenerateStatusWindow() {

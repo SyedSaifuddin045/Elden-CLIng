@@ -1,4 +1,5 @@
 #include <Game.h>
+#include "Player.h"
 #include <curses.h>
 int main(int argc, char *argv[]) {
   Initialize();

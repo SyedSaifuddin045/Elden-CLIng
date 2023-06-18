@@ -1,14 +1,15 @@
 #ifndef GAME_H
 #define GAME_H
-#include "Enemy.h"
 #include "Item.h"
-#include "Player.h"
 #include <Initialize.h>
 #include <UI.h>
 #include <algorithm>
 #include <cstring>
 #include <curses.h>
 
+class Enemy;
+class Player;
+struct Location;
 class Game {
 public:
   static std::vector<std::string> ACTION_OPTIONS;
@@ -31,16 +32,7 @@ public:
   static UI ui;
   static const char *Ascii_Title;
   static std::vector<Location> Obstacle_Locations;
-  static bool isObstacleLocation(Location& L) {
-    for (Location OL : Game::Obstacle_Locations) 
-    {
-      if (L.x == OL.x && L.y == OL.y)
-      {
-        return true;
-      }
-    }
-    return false;
-  }
+  static bool isObstacleLocation(Location& L);
   static void ExitGame()
   {
     Initialize::UnInitialize();

@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "Player.h"
 #include "Item.h"
 #include "Json.h"
 #include "Stats.h"
@@ -42,6 +43,16 @@ const char* Game::Ascii_Title = R"(
                                              
 
 )";
+bool Game::isObstacleLocation(Location& L) {
+    for (Location OL : Game::Obstacle_Locations) 
+    {
+      if (L.x == OL.x && L.y == OL.y)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 int Game::col_beg,Game::row_beg;
 std::vector<Location> Game::Obstacle_Locations;  
 Player Game::player = Player::getInstance();

@@ -9,7 +9,7 @@
 #include <Json.h>
 #include <Enemy.h>
 
-class Player : Entitiy {
+class Player : public Entitiy {
 public:
   static Player& getInstance() {
     return instance;
