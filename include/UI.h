@@ -9,6 +9,8 @@ class UI{
   Window New_Game_Window,Main_Window,Actions_Window,Inventory_Window,Status_Window,Game_Window,Main_Menu_Window,Character_Select_Window,End_Screen;
   int input;
   bool Title_generated,Main_Menu_generated,Character_Select_generated,Play_Game_Generated,End_Screen_generated=false;
+  std::string PlayerTurnString , EnemyTurnString;
+  friend class Game;
   public:
   void GeneratePlayGameUI(std::vector<std::string> Options,std::vector<std::string>INVENTORY);
   void GenerateWindow(Window &win,int height,int width,int start_y,int start_x);
@@ -18,9 +20,8 @@ class UI{
   void Generate_Grid(WINDOW* window, int row, int col);
   void GenerateStatusWindow();
   void Clear();
-  void GetInput();
-  friend class Game;
   void UpdatePlayerandEnemyPos();
+  void PrintTurnActions();
 
 void printAsciiArtInCenter(const char* asciiArt) {
     // Get the screen size

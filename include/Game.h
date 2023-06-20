@@ -38,5 +38,6 @@ public:
     Initialize::UnInitialize();
     std::exit(0);
   }
+  static int Turn_Counter;
 };
 #endif // !GAME_H

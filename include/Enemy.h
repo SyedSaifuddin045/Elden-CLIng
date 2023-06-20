@@ -27,7 +27,7 @@ public:
   {
     Entitiy::setLocation(x,y);
   }
-  void Turn(Entitiy player)
+  std::string Turn(Entitiy player)
   {
     int move = Random::Random_Number(0, 1);
     if(move == 1)
@@ -35,13 +35,16 @@ public:
     int action_index = Random::Random_Number(1,2);
     if(!checkInRange(player, 1) && action_index == 1)
     {
-      Move(player.getLocation(), 1); 
+      Move(player.getLocation(), 1);
+      return "Enemy moved from " + std::to_string(previous_location.x) + "," + std::to_string(previous_location.y) + " to " + std::to_string(location.x) + "," + std::to_string(location.y);
     }
     if(checkInRange(player, 1) && action_index == 2)
     {
-      Attack(player, 1.0f);
+      int damage = Attack(player, 1.0f);
+      return "Enemy attacked player for "+std::to_string(damage)+"damage.";
     }
     }
+    return "Enemy did not act.";
   }
   bool checkInRange(Entitiy E,int range)
   {

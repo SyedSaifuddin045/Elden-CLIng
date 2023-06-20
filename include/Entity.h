@@ -23,10 +23,11 @@ public:
     stat = Stats();
     location = Location({0, 0});
   }
-  void Attack(Entitiy &entity, float multiplier)
+  int Attack(Entitiy &entity, float multiplier)
   {
     int damage = multiplier * stat.Attack;
     entity.TakeDamage(damage);
+    return damage;
   }
   void TakeDamage(int damage)
   {
@@ -97,10 +98,12 @@ public:
       }
 
       // Update the current location to the closest non-obstacle location
+      previous_location = location;
       location = closestLocation;
     }
     else
     {
+      previous_location = location;
       // Move towards the target location if no obstacle is present
       if (dx != 0)
         location.x += dx > 0 ? -1 : +1;

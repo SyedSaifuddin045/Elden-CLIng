@@ -49,7 +49,7 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
       Inventory_Window.getWidth() + 1);
 
   Game::game_row =
-      Random::Random_Number(5, (Game_Window.getHeight() / 2) - 2) * 2;
+      Random::Random_Number(5, (Game_Window.getHeight() / 2) - 3) * 2;
   Game::game_col =
       Random::Random_Number(5, (Game_Window.getWidth() / 2) - 2) * 2;
 
@@ -82,15 +82,30 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
       action_menu.Refresh();
       Actions_Window.Refresh();
     }
-    Game::current_Enemy.Turn(Game::player);
+    EnemyTurnString = Game::current_Enemy.Turn(Game::player);
     GenerateStatusWindow();
     UpdatePlayerandEnemyPos();
+    PrintTurnActions();
     Game_Window.Refresh();
     }
     //wgetch(Game_Window.getWindow());
   }
   Play_Game_Generated = true;
   action_menu.Destroy();
+}
+
+void UI::PrintTurnActions()
+{
+  wmove(Game_Window.getWindow(), Game_Window.getHeight() - 3 , 1);
+  wclrtoeol(Game_Window.getWindow());
+  wmove(Game_Window.getWindow(), Game_Window.getHeight() - 2 , 1);
+  wclrtoeol(Game_Window.getWindow());
+  mvwprintw(Game_Window.getWindow(),Game_Window.getHeight() - 4,1,"Turn :");
+  mvwprintw(Game_Window.getWindow(),Game_Window.getHeight() - 3,2,"PLAYER Action : %s",PlayerTurnString.c_str() );
+  mvwprintw(Game_Window.getWindow(),Game_Window.getHeight() - 2,2,"ENEMY Action : %s",EnemyTurnString.c_str() );
+
+  PlayerTurnString = "";
+  EnemyTurnString = "";
 }
 
 void UI::GenerateWindow(Window &win, int height, int width, int start_y,
@@ -297,14 +312,14 @@ void UI::Generate_Grid(WINDOW *window, int row, int col) {
 
 void UI::UpdatePlayerandEnemyPos() {
     // Clear previous player position
-    mvwprintw(Game_Window.getWindow(), Game::row_beg + (Game::player.getPreviousLocation().y * 2), Game::col_beg + Game::player.getPreviousLocation().x + 1, " ");
+    mvwprintw(Game_Window.getWindow(), Game::row_beg + (Game::player.getPreviousLocation().y * 2), Game::col_beg + Game::player.getPreviousLocation().x * 2, " ");
 
     // Clear previous enemy position
     mvwprintw(Game_Window.getWindow(), Game::row_beg + (Game::current_Enemy.getPreviousLocation().y * 2), Game::col_beg + Game::current_Enemy.getPreviousLocation().x * 2, " ");
 
     // Update player position
     wattron(Game_Window.getWindow(), COLOR_PAIR(5) | A_BLINK | A_BOLD);
-    mvwprintw(Game_Window.getWindow(), Game::row_beg + (Game::player.getPlayerLocation().y * 2), Game::col_beg + Game::player.getPlayerLocation().x + 1, "P");
+    mvwprintw(Game_Window.getWindow(), Game::row_beg + (Game::player.getPlayerLocation().y * 2), Game::col_beg + Game::player.getPlayerLocation().x * 2, "P");
     wattroff(Game_Window.getWindow(), COLOR_PAIR(5) | A_BLINK | A_BOLD);
     Game::player.setPlayerLocation(Game::player.getLocation());
 
@@ -370,13 +385,15 @@ void UI::GenerateStatusWindow() {
 }
 void UI::MoveInGrid(int increment) {
   int c;
-  int cur_X = Game::col_beg + 2, cur_Y = Game::row_beg + 2;
+  bool enterPressed = false;
+  int cur_X = Game::col_beg + (Game::player.getPlayerLocation().x * 2);
+  int cur_Y = Game::row_beg + (Game::player.getPlayerLocation().y * 2);
   Location CurrentLocation;
   CurrentLocation.y = cur_Y;
   CurrentLocation.x = cur_X;
+  Location newLocation = Game::player.getPlayerLocation();
   wmove(Game_Window.getWindow(), CurrentLocation.y, CurrentLocation.x);
-  while ((c = wgetch(Game_Window.getWindow())) != 10) {
-    Location newLocation;
+  while ((c = wgetch(Game_Window.getWindow())) != KEY_F(1)) {
     switch (c) {
     case KEY_DOWN:
       newLocation = {CurrentLocation.x, CurrentLocation.y - increment};
@@ -414,13 +431,25 @@ void UI::MoveInGrid(int increment) {
         CurrentLocation.x = cur_X;
       }
       break;
+    default:
+    case 10:
+    case KEY_ENTER:
+      enterPressed = true;
+      newLocation = {(CurrentLocation.x - Game::col_beg)/2,(CurrentLocation.y - Game::row_beg)/2};
+      //mvwprintw(Game_Window.getWindow(), 0, 0,"Current Position = %d , %d and isObstacleLocation = %d",newLocation.y, newLocation.x,Game::isObstacleLocation(CurrentLocation));
+      Game::player.setPreviousLocation(Game::player.getPlayerLocation());
+      Game::player.setPlayerLocation(newLocation);
     }
-    //mvwprintw(Game_Window.getWindow(), 0, 0,"Current Position = %d , %d and isObstacleLocation = %d",CurrentLocation.y, CurrentLocation.x,Game::isObstacleLocation(CurrentLocation));
+    if(enterPressed)
+    {
+      PlayerTurnString = "Player moved from " + std::to_string(Game::player.getPreviousLocation().x) + "," + std::to_string(Game::player.getPreviousLocation().y)
+       + " to " + std::to_string(Game::player.getLocation().x) +","+ std::to_string(Game::player.getLocation().y);
+      break;
+    }
     wmove(Game_Window.getWindow(), CurrentLocation.y, CurrentLocation.x);
     Game_Window.Refresh();
   }
 }
-
 void UI::EnterPlayerDetails() {
   std::string str = "Enter Your Name :";
   GenerateWindow(New_Game_Window, 5, COLS - 4,
