@@ -43,6 +43,20 @@ const char* Game::Ascii_Title = R"(
                                              
 
 )";
+bool Game::isEnemyLocation(Location L)
+{
+  if(L.x == (Game::col_beg + (Game::current_Enemy.getLocation().x * 2)) && L.y == (Game::row_beg + (Game::current_Enemy.getLocation().y * 2)))
+    return true;
+  else
+   return false;
+}
+bool Game::isPlayerLocation(Location L)
+{
+  if(L.x == (Game::col_beg + (Game::player.getLocation().x * 2)) && L.y == (Game::row_beg + (Game::player.getLocation().y * 2)))
+    return true;
+  else
+   return false;
+}
 bool Game::isObstacleLocation(Location& L) {
     for (Location OL : Game::Obstacle_Locations) 
     {
@@ -55,5 +69,6 @@ bool Game::isObstacleLocation(Location& L) {
   }
 int Game::col_beg,Game::row_beg;
 std::vector<Location> Game::Obstacle_Locations;  
+std::string Game::S = "YOU DIED!";
 Player Game::player = Player::getInstance();
 std::vector<std::string> Game::Enemy_list = {"Smough","Ornstien","Kaiden Warrior","Magic Archer","Noble Swordsman","CrestFallen Warrior"};

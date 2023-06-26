@@ -11,21 +11,35 @@ public:
   {
     int seed = Random::Random_Number(1, level);
 
-    int R_Max_HP = Random::Random_Number(seed*1,seed * level);
+    int R_Max_HP = Random::Random_Number(seed*1,seed/2 * level);
     max_HP = R_Max_HP;
-    int R_max_stamina = Random::Random_Number(seed*1,seed * level) ;
+    int R_max_stamina = Random::Random_Number(seed*1,seed/2  * level) ;
     max_Stamina = R_max_stamina;
-    int R_Attack = Random::Random_Number(seed*1,seed * level) ;
+    int R_Attack = Random::Random_Number(seed*1,seed/2 * level) ;
     Attack = R_Attack;
-    int R_Defense = Random::Random_Number(seed*1,seed * level) ;
+    int R_Defense = Random::Random_Number(seed*1,seed/2 * level) ;
     Defense = R_Defense;
-    int R_HP_regain = Random::Random_Number(seed*1,seed * level) ;
+    int R_HP_regain = Random::Random_Number(seed*1,seed/2 * level) ;
     HP_regain = R_HP_regain;
-    int R_Stamina_regain = Random::Random_Number(seed*1,seed * level);
+    int R_Stamina_regain = Random::Random_Number(seed*1,seed/2 * level);
     Stamina_regain = R_Stamina_regain;
     current_HP = max_HP;
     current_Stamina = max_Stamina;
   }
+  Stats operator+(const Stats& other) const {
+        Stats result;
+
+        result.max_HP = max_HP + other.max_HP;
+        result.max_Stamina = max_Stamina + other.max_Stamina;
+        result.current_HP = current_HP + other.current_HP;
+        result.current_Stamina = current_Stamina + other.current_Stamina;
+        result.Attack = Attack + other.Attack;
+        result.Defense = Defense + other.Defense;
+        result.HP_regain = HP_regain + other.HP_regain;
+        result.Stamina_regain = Stamina_regain + other.Stamina_regain;
+
+        return result;
+    }
   int max_HP;
   int max_Stamina;
   int current_HP;

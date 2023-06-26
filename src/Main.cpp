@@ -20,14 +20,24 @@ int main(int argc, char *argv[]) {
       Game::ui.Clear();
       Game::ui.GenerateMainMenu(Game::MAIN_MENU_OPTIONS);
       break;
+    case Game::Rest:
+      Game::INVENTORY = Game::player.getInventory();
+      Inventory_items.clear();
+      for (const auto &item : Game::INVENTORY) {
+        Inventory_items.push_back(item.Name);
+      }
+      Game::ui.GenerateRestUI(Inventory_items);
+      break;
     case Game::Play_Game:
       Game::ui.Clear();
+      Inventory_items.clear();
       Game::INVENTORY = Game::player.getInventory();
       for (const auto &item : Game::INVENTORY) {
         Inventory_items.push_back(item.Name);
       }
       Game::ui.GeneratePlayGameUI(Game::ACTION_OPTIONS, Inventory_items);
-      Game::game_state = Game::GameState::End_Screen;
+      // getch();
+      // Game::game_state = Game::GameState::End_Screen;
       break;
     case Game::Character_Select:
       Game::ui.Clear();
@@ -35,11 +45,9 @@ int main(int argc, char *argv[]) {
       // getch();
       Game::game_state = Game::GameState::Play_Game;
       break;
-
     case Game::End_Screen:
       Game::ui.Clear();
-      Game::ui.GenerateEndScreen();
-      getch();
+      Game::ui.GenerateEndScreen(Game::S);
       Game::game_state = Game::GameState::End_Game;
       break;
     case Game::End_Game:

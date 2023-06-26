@@ -26,11 +26,26 @@ public:
   int Attack(Entitiy &entity, float multiplier)
   {
     int damage = multiplier * stat.Attack;
+    if(! ((entity.stat.Defense / 2) > damage))
+      damage = damage - (entity.stat.Defense / 2);
+    else
+    { 
+      entity.TakeDamage(1);
+      return 1;
+    }
     entity.TakeDamage(damage);
     return damage;
   }
-  void TakeDamage(int damage)
+  void RecoverHP(int HPamount)
   {
+    stat.current_HP += HPamount;
+    if(stat.current_HP > stat.max_HP)
+    {
+      stat.current_HP = stat.max_HP;
+    }
+  }
+  void TakeDamage(int damage)
+  { 
     if (stat.current_HP - damage <= 0)
     {
       stat.current_HP = 0;
@@ -71,10 +86,15 @@ public:
   {
     int dy = location.y - L.y;
     int dx = location.x - L.x;
-
+    previous_location = location;
+      // Move towards the target location if no obstacle is present
+      if (dx != 0)
+        location.x += dx > 0 ? -1 : +1;
+      if (dy != 0)
+        location.y += dy > 0 ? -1 : +1;
     // Check if the current location is an obstacle
     Location currentLocation = location;
-    if (Game::isObstacleLocation(currentLocation))
+    if (Game::isObstacleLocation(currentLocation) || Game::isPlayerLocation(currentLocation))
     {
       // Find the closest non-obstacle location to the target location
       Location closestLocation;
@@ -98,17 +118,7 @@ public:
       }
 
       // Update the current location to the closest non-obstacle location
-      previous_location = location;
       location = closestLocation;
-    }
-    else
-    {
-      previous_location = location;
-      // Move towards the target location if no obstacle is present
-      if (dx != 0)
-        location.x += dx > 0 ? -1 : +1;
-      if (dy != 0)
-        location.y += dy > 0 ? -1 : +1;
     }
   }
   void setPreviousLocation(Location L)

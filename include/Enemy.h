@@ -4,6 +4,7 @@
 #include "Random.h"
 #include <Stats.h>
 #include <string>
+#include <utility>
 
 class Enemy :public Entitiy {
 public:
@@ -27,7 +28,8 @@ public:
   {
     Entitiy::setLocation(x,y);
   }
-  std::string Turn(Entitiy player)
+  //0 for did no move , 1 for Moved , >1 for damage
+  std::pair<std::string,int> Turn(Entitiy& player)
   {
     int move = Random::Random_Number(0, 1);
     if(move == 1)
@@ -36,15 +38,15 @@ public:
     if(!checkInRange(player, 1) && action_index == 1)
     {
       Move(player.getLocation(), 1);
-      return "Enemy moved from " + std::to_string(previous_location.x) + "," + std::to_string(previous_location.y) + " to " + std::to_string(location.x) + "," + std::to_string(location.y);
+      return std::make_pair("Enemy moved from " + std::to_string(previous_location.x) + "," + std::to_string(previous_location.y) + " to " + std::to_string(location.x) + "," + std::to_string(location.y),1);
     }
     if(checkInRange(player, 1) && action_index == 2)
     {
       int damage = Attack(player, 1.0f);
-      return "Enemy attacked player for "+std::to_string(damage)+"damage.";
+      return std::make_pair("Enemy attacked player for "+std::to_string(damage)+"damage.",damage);
     }
     }
-    return "Enemy did not act.";
+    return std::pair("Enemy did not act.",0);
   }
   bool checkInRange(Entitiy E,int range)
   {

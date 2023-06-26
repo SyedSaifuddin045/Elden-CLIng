@@ -23,7 +23,19 @@ public:
 
   void addItemToInventory(const Item &item) { Inventory.push_back(item); }
 
-  void equipItem(const Slot &slot, const Item &item) { Equipment[slot] = item; }
+  void equipItem(const Slot &slot, const Item &item) 
+  {
+    Equipment[slot] = item;
+    UpdatePlayerStats();
+  }
+  void unequipItem(Slot& slot)
+  {
+    if(Equipment.count(slot) == 1)
+    {
+      Equipment.erase(slot);
+    }
+    UpdatePlayerStats();
+  }
 
   std::string getName() const { return Name; }
 
@@ -55,7 +67,13 @@ public:
       return Item();
     }
   }
-
+  
+  void UpdatePlayerStats()
+  {
+    for (const auto& item : Equipment) {
+            stat = stat + item.second.Stat_Change;
+        }
+  }
   void ToJson(rapidjson::Value &value,
               rapidjson::Document::AllocatorType &allocator) const {
     value.SetObject();
@@ -117,6 +135,7 @@ public:
       item.FromJson(it->value);
       equipItem(slot, item);
     }
+    
   }
 
 private:

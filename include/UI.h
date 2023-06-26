@@ -1,5 +1,6 @@
 #ifndef UI_H
 #define UI_H
+#include "Item.h"
 #include <ncurses.h>
 #include <Window.h>
 #include <Menu.h>
@@ -16,12 +17,15 @@ class UI{
   void GenerateWindow(Window &win,int height,int width,int start_y,int start_x);
   void GenerateMainMenu(std::vector<std::string> &Options);
   void GenerateCharaterSelect(std::vector<std::string> &Characters);
-  void GenerateEndScreen();
+  void GenerateEndScreen(std::string& S);
   void Generate_Grid(WINDOW* window, int row, int col);
+  void GenerateRestUI(std::vector<std::string> INVENTORY);
   void GenerateStatusWindow();
   void Clear();
   void UpdatePlayerandEnemyPos();
   void PrintTurnActions();
+  void PrintPlayerDetails(Window& window);
+  std::string GetStatString(Item& item);
 
 void printAsciiArtInCenter(const char* asciiArt) {
     // Get the screen size
