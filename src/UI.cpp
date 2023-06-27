@@ -27,18 +27,24 @@ void UI::GenerateRestUI(std::vector<std::string> INVENTORY)
   Inventory_Window.Print_Window_Title(str);
 
   GenerateWindow(Game_Window, LINES - Actions_Window.getHeight() - 2, COLS - Inventory_Window.getWidth() -2 , 1, Inventory_Window.getWidth() + 1);
+  while (Game::game_state == Game::GameState::Rest) 
+  {
+    wclear(Game_Window.getWindow());
+    wattron(Game_Window.getWindow(),COLOR_PAIR(1));
+    Game_Window.Box(0,0);
+    wattroff(Game_Window.getWindow(),COLOR_PAIR(1));
   PrintPlayerDetails(Game_Window);
-  Menu inventory_menu;
+    Menu inventory_menu;
   inventory_menu.Create(Inventory_Window.getWindow(), 3, 1,
                         Inventory_Window.getHeight() - 4,
                         Inventory_Window.getWidth()-1,Inventory_Window.getHeight()-4,1, INVENTORY);
   Inventory_Window.setMenu(inventory_menu);
-  std::string selec = Action_menu.Handle_Input();
+    std::string selec = Action_menu.Handle_Input();
   if(selec == Options[0])
   {
     std::string item_name = inventory_menu.Handle_Input();
     std::unordered_map<Slot, Item> Player_equipment = Game::player.getEquipment();
-    std::vector<std::string> inventory_options = {"USE/EQUIUP","DISCARD"};
+    std::vector<std::string> inventory_options = {"USE/EQUIP","DISCARD"};
     for(auto equipment : Player_equipment)
     {
       if(equipment.second.Name == item_name)
@@ -48,7 +54,22 @@ void UI::GenerateRestUI(std::vector<std::string> INVENTORY)
     }
     Menu item_menu;
     item_menu.Create(Inventory_Window.getWindow(),Inventory_Window.getHeight() - 4,1,4,inventory_options[0].size() + 2,2,1,inventory_options);
-    item_menu.Handle_Input();
+    std::string item_option = item_menu.Handle_Input();
+    if(item_option == "USE/EQUIP")
+    {
+      Item I = Game::player.getItembyName(item_name);
+      Game::player.equipItem(I);
+    }
+    if(item_option == "UNEQUIP")
+    {
+      Item I = Game::player.getItembyName(item_name);
+      Game::player.unequipItem(I.Item_slot);
+    }
+    if(item_option == "DISCARD")
+    {
+      Item I = Game::player.getItembyName(item_name);
+      Game::player.DiscardItemFromInventory(I);
+    }
     item_menu.Refresh();
   }
   if(selec == Options[1])
@@ -57,7 +78,14 @@ void UI::GenerateRestUI(std::vector<std::string> INVENTORY)
     Game::game_state = Game::GameState::Play_Game;
     return;
   }
-  inventory_menu.Destroy();
+  if(selec == Options[3])
+  {
+    Json json;
+    json.FromObject<Player>(Game::player);
+    json.Write(Game::player.getName() + ".json");
+    Game::game_state = Game::End_Game;
+  }
+  }
   Game::game_state = Game::End_Game;
 }
 void UI::PrintPlayerDetails(Window& window)
@@ -108,6 +136,7 @@ void UI::PrintPlayerDetails(Window& window)
     mvwprintw(win,l,(max_width/2 - (St.size()/2)),"%s",St.c_str());
     l++;
   }
+  St = "";
 
   p = equipment.find(Slot::Torso);
   l++;
@@ -128,6 +157,7 @@ void UI::PrintPlayerDetails(Window& window)
     mvwprintw(win,l,(max_width/2 - (St.size()/2)),"%s",St.c_str());
     l++;
   }
+  St = "";
 
   p = equipment.find(Slot::Hands);
   l++;
@@ -148,6 +178,7 @@ void UI::PrintPlayerDetails(Window& window)
     mvwprintw(win,l,(max_width/2 - (St.size()/2)),"%s",St.c_str());
     l++;
   }
+  St = "";
 
   p = equipment.find(Slot::Legs);
   l++;
@@ -168,6 +199,7 @@ void UI::PrintPlayerDetails(Window& window)
     mvwprintw(win,l,(max_width/2 - (St.size()/2)),"%s",St.c_str());
     l++;
   }
+  St = "";
 
   p = equipment.find(Slot::Left_Hand);
   l++;
@@ -188,6 +220,7 @@ void UI::PrintPlayerDetails(Window& window)
     mvwprintw(win,l,(max_width/2 - (St.size()/2)),"%s",St.c_str());
     l++;
   }
+  St = "";
 
   p = equipment.find(Slot::Right_Hand);
   l++;
@@ -208,6 +241,7 @@ void UI::PrintPlayerDetails(Window& window)
     mvwprintw(win,l,(max_width/2 - (St.size()/2)),"%s",St.c_str());
     l++;
   }
+  St = "";
 
   wattroff(win, COLOR_PAIR(4));
   window.Refresh();
@@ -244,8 +278,9 @@ std::string UI::GetStatString(Item& item)
 }
 void UI::GeneratePlayGameUI(std::vector<std::string> Options,
                             std::vector<std::string> INVENTORY) {
-  if (Play_Game_Generated)
+  if (Game::ui.Play_Game_Generated)
     return;
+  refresh();
   int action_menu_width = 12;
   GenerateWindow(Main_Window, 0, 0, 0, 0);
 
@@ -288,6 +323,7 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
   Generate_Grid(Game_Window.getWindow(), Game::game_row, Game::game_col);
   GenerateStatusWindow();
   Game_Window.Refresh();
+  refresh();
   bool block = false;
   if (Actions_Window.getWindow()) {
     curs_set(1);
@@ -382,7 +418,7 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
     }
     //wgetch(Game_Window.getWindow());
   }
-  Play_Game_Generated = true;
+  Game::ui.Play_Game_Generated = true;
   action_menu.Destroy();
 }
 

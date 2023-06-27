@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
       Game::ui.GenerateRestUI(Inventory_items);
       break;
     case Game::Play_Game:
-      Game::ui.Clear();
+      //Game::ui.Clear();
       Inventory_items.clear();
       Game::INVENTORY = Game::player.getInventory();
       for (const auto &item : Game::INVENTORY) {

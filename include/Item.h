@@ -48,7 +48,6 @@ public:
   enum Item_Class { Armour, Weapon, Consumable } Class;
   Stats Stat_Change;
   Slot Item_slot;
-
   void ToJson(rapidjson::Value &value,
               rapidjson::Document::AllocatorType &allocator) const {
     value.SetObject();

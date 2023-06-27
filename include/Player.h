@@ -1,7 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include "Location.h"
-#include <Item.h>
+#include "Item.h"
 #include <string>
 #include <Stats.h>
 #include <vector>
@@ -23,9 +23,9 @@ public:
 
   void addItemToInventory(const Item &item) { Inventory.push_back(item); }
 
-  void equipItem(const Slot &slot, const Item &item) 
+  void equipItem(const Item &item) 
   {
-    Equipment[slot] = item;
+    Equipment[item.Item_slot] = item;
     UpdatePlayerStats();
   }
   void unequipItem(Slot& slot)
@@ -35,6 +35,15 @@ public:
       Equipment.erase(slot);
     }
     UpdatePlayerStats();
+  }
+  Item getItembyName(std::string item_name)
+  {
+    for(auto item:Inventory)
+    {
+      if(item.Name == item_name)
+        return item;
+    }
+    return Item();
   }
 
   std::string getName() const { return Name; }
@@ -70,9 +79,11 @@ public:
   
   void UpdatePlayerStats()
   {
+    Stats newstat = stat;
     for (const auto& item : Equipment) {
-            stat = stat + item.second.Stat_Change;
+            newstat = newstat + item.second.Stat_Change;
         }
+        stat = newstat;
   }
   void ToJson(rapidjson::Value &value,
               rapidjson::Document::AllocatorType &allocator) const {
@@ -133,9 +144,22 @@ public:
       Slot slot = SlotUtils::StringToSlot(it->name.GetString());
       Item item;
       item.FromJson(it->value);
-      equipItem(slot, item);
+      equipItem(item);
     }
     
+  }
+  void DiscardItemFromInventory(Item& item)
+  {
+    Inventory.erase(
+    std::remove_if(
+        Inventory.begin(),
+        Inventory.end(),
+        [&](const Item& item) {
+            return item.Name == item.Name;
+        }
+    ),
+    Inventory.end()
+);
   }
 
 private:
