@@ -7,6 +7,9 @@ public:
   Stats()
     :max_HP(0),max_Stamina(0),current_HP(0),current_Stamina(0),Attack(0),Defense(0),HP_regain(0),Stamina_regain(0)
   {}
+  Stats(int _max_HP,int _max_Stamina , int _current_HP,int _current_Stamina,int _Attack,int _Defense,int _HP_regain,int _Stamina_regain)
+    :max_HP(_max_HP),max_Stamina(_max_Stamina),current_HP(_current_HP),current_Stamina(_current_Stamina),Attack(_Attack),Defense(_Defense),HP_regain(_HP_regain),Stamina_regain(_Stamina_regain)
+  {}
   void generateRandomStats(int level)
   {
     int seed = Random::Random_Number(1, level);

@@ -12,37 +12,49 @@
 #include <string>
 #include <utility>
 #include <vector>
-void UI::GenerateRestUI(std::vector<std::string> INVENTORY)
+void UI::GenerateRestUI()
 {
   Game::ui.Clear();
-  std::vector<std::string>  Options = {"INVENTORY","FIGHT/TAKE","RUN/NEXT","SAVE GAME/EXIT"};
   GenerateWindow(Actions_Window, 8, COLS - 2, LINES - 9, 1);
-  Menu Action_menu;
-  Action_menu.Create(Actions_Window.getWindow(),1,2,3,Actions_Window.getWidth() - 4,1,4,Options);
-  Actions_Window.setMenu(Action_menu);
-  GenerateWindow(Inventory_Window, LINES - (Actions_Window.getHeight()) - 2, 20,
-                 1, 1);
+  GenerateWindow(Inventory_Window, LINES - (Actions_Window.getHeight()) - 2, 20,1, 1); 
 
+  std::vector<std::string>  Options = {"INVENTORY","FIGHT/TAKE","RUN/NEXT","SAVE GAME/EXIT"};
   std::string str = "INVENTORY";
   Inventory_Window.Print_Window_Title(str);
-
+  
   GenerateWindow(Game_Window, LINES - Actions_Window.getHeight() - 2, COLS - Inventory_Window.getWidth() -2 , 1, Inventory_Window.getWidth() + 1);
+  int selection = GenerateRestRandom();
+  PrintRestRandom(Game_Window, selection);
   while (Game::game_state == Game::GameState::Rest) 
-  {
+  { 
     wclear(Game_Window.getWindow());
     wattron(Game_Window.getWindow(),COLOR_PAIR(1));
     Game_Window.Box(0,0);
     wattroff(Game_Window.getWindow(),COLOR_PAIR(1));
-  PrintPlayerDetails(Game_Window);
-    Menu inventory_menu;
-  inventory_menu.Create(Inventory_Window.getWindow(), 3, 1,
-                        Inventory_Window.getHeight() - 4,
-                        Inventory_Window.getWidth()-1,Inventory_Window.getHeight()-4,1, INVENTORY);
-  Inventory_Window.setMenu(inventory_menu);
-    std::string selec = Action_menu.Handle_Input();
+    PrintPlayerDetails(Game_Window); 
+
+    Menu* Action_menu = new Menu();
+    Action_menu->Create(Actions_Window.getWindow(),1,2,3,Actions_Window.getWidth() - 4,1,4,Options);
+    Actions_Window.setMenu(*Action_menu);
+    mvwprintw(Game_Window.getWindow(),0,0,"%d",selection);
+    PrintRestRandom(Game_Window, selection);
+
+    std::string selec = Action_menu->Handle_Input();
+
   if(selec == Options[0])
   {
+    Game::INVENTORY = Game::player.getInventory();
+    std::vector<std::string> INVENTORY;
+    for (const auto &item : Game::INVENTORY) {
+        INVENTORY.push_back(item.Name);
+      }
+    Menu inventory_menu;
+    inventory_menu.Create(Inventory_Window.getWindow(), 3, 1,
+                        Inventory_Window.getHeight() - 4,
+                        Inventory_Window.getWidth()-1,Inventory_Window.getHeight()-4,1, INVENTORY);
+
     std::string item_name = inventory_menu.Handle_Input();
+    
     std::unordered_map<Slot, Item> Player_equipment = Game::player.getEquipment();
     std::vector<std::string> inventory_options = {"USE/EQUIP","DISCARD"};
     for(auto equipment : Player_equipment)
@@ -70,13 +82,26 @@ void UI::GenerateRestUI(std::vector<std::string> INVENTORY)
       Item I = Game::player.getItembyName(item_name);
       Game::player.DiscardItemFromInventory(I);
     }
-    item_menu.Refresh();
+    item_menu.Destroy();
+    inventory_menu.Destroy();
   }
   if(selec == Options[1])
   {
+    if(selection == 1)
+    {
     Game::ui.Play_Game_Generated = false;
     Game::game_state = Game::GameState::Play_Game;
     return;
+    }
+    if(selection == 2)
+    {
+      Game::player.addItemToInventory(Game::current_Item);
+    }
+    selection = Random::Random_Number(1,2);
+  }
+  if(selec == Options[2])
+  {
+    selection = GenerateRestRandom();
   }
   if(selec == Options[3])
   {
@@ -85,6 +110,7 @@ void UI::GenerateRestUI(std::vector<std::string> INVENTORY)
     json.Write(Game::player.getName() + ".json");
     Game::game_state = Game::End_Game;
   }
+  Action_menu->Refresh();
   }
   Game::game_state = Game::End_Game;
 }
@@ -246,6 +272,59 @@ void UI::PrintPlayerDetails(Window& window)
   wattroff(win, COLOR_PAIR(4));
   window.Refresh();
 }
+
+void UI::PrintRestRandom(Window& window,int selection)
+{
+  WINDOW* win = window.getWindow();
+  //1 for Enemy , 2 for Item
+  std::string S,E;
+  switch (selection) 
+  {
+    case 2:
+      S = "You found item : "+Game::current_Item.Name+",Item type : "+std::to_string(Game::current_Item.Class);
+      mvwprintw(win, window.getHeight() - 3, 1, "%s",S.c_str());
+      E = GetStatString(Game::current_Item);
+      mvwprintw(win, window.getHeight() - 2, 1, "%s",E.c_str());
+      break;
+    case 1:
+      S = "You Encountered : "+Game::current_Enemy.getName()+" of level "+std::to_string(Game::current_Enemy.getLevel());
+      mvwprintw(win, window.getHeight() - 3, 1, "%s",S.c_str());
+      E = GetCurrentEnemyStatString();mvwprintw(win, window.getHeight() - 2, 1, "%s",E.c_str());
+      break;
+  } 
+  window.Refresh();
+}
+std::string UI::GetCurrentEnemyStatString()
+{
+  Stats S =Game::current_Enemy.getStats();
+  std::string str;
+  if(S.max_HP != 0)
+  {
+    str += "M_HP : "+std::to_string(S.max_HP);
+  }
+  if(S.max_Stamina != 0)
+  {
+    str += "M_STA : "+std::to_string(S.max_HP);
+  }
+  if(S.Attack != 0)
+  {
+    str += "ATT : "+std::to_string(S.Attack);
+  }
+  if(S.Defense != 0)
+  {
+    str += "DEF : "+std::to_string(S.Defense);
+  }
+  if(S.HP_regain != 0)
+  {
+    str += "HP_R : "+std::to_string(S.HP_regain);
+  }
+  if(S.Stamina_regain != 0)
+  {
+    str += "ST_R : "+std::to_string(S.Stamina_regain);
+  }
+  return str;
+}
+
 std::string UI::GetStatString(Item& item)
 {
   Stats S =item.Stat_Change;
@@ -277,7 +356,8 @@ std::string UI::GetStatString(Item& item)
   return str;
 }
 void UI::GeneratePlayGameUI(std::vector<std::string> Options,
-                            std::vector<std::string> INVENTORY) {
+                            std::vector<std::string> INVENTORY) 
+{
   if (Game::ui.Play_Game_Generated)
     return;
   refresh();
@@ -285,10 +365,7 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
   GenerateWindow(Main_Window, 0, 0, 0, 0);
 
   GenerateWindow(Actions_Window, 8, COLS - 2, LINES - 9, 1);
-
-  Menu action_menu;
-  action_menu.Create(Actions_Window.getWindow(), 1, 1, 6, action_menu_width,6,1, Options);
-  Actions_Window.setMenu(action_menu);
+ 
   GenerateWindow(Inventory_Window, LINES - (Actions_Window.getHeight()) - 2, 20,
                  1, 1);
 
@@ -302,12 +379,7 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
   Inventory_Window.Print_Window_Title(str);
 
   GenerateWindow(Status_Window, 11, COLS - (Inventory_Window.getWidth()) - 2, 1,
-                 (Inventory_Window.getWidth() + 1));
-  int enemy_index = Random::Random_Number(0, Game::Enemy_list.size() - 1);
-  Location Zero_Location = {0,0};
-  Stats Zero_Stats = Stats();
-  Enemy enemy =  Enemy(Game::Enemy_list[enemy_index],Zero_Stats,Zero_Location,Game::player.getLevel()) ;
-  Game::current_Enemy = enemy;
+                 (Inventory_Window.getWidth() + 1)); 
 
   GenerateWindow(
       Game_Window,
@@ -329,6 +401,9 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
     curs_set(1);
     while(Game::player.getStats().current_HP != 0)
     {
+      Menu action_menu;
+      action_menu.Create(Actions_Window.getWindow(), 1, 1, 6, action_menu_width,6,1, Options);
+      Actions_Window.setMenu(action_menu);
       //0 for did no move , 1 for Moved , >1 for damage
       std::pair<std::string,int> P = Game::current_Enemy.Turn(Game::player);
       EnemyTurnString = P.first;
@@ -408,6 +483,8 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
       std::string str = "ENEMY IS DEAD!";
       GenerateEndScreen(str);
       End_Screen_generated = false;
+      inventory_menu.Destroy();
+      action_menu.Destroy();
       Game::game_state = Game::Rest;
       break;
     }
@@ -419,7 +496,24 @@ void UI::GeneratePlayGameUI(std::vector<std::string> Options,
     //wgetch(Game_Window.getWindow());
   }
   Game::ui.Play_Game_Generated = true;
-  action_menu.Destroy();
+}
+int UI::GenerateRestRandom()
+{
+  //1 for Enemy , 2 for Item
+  int selection = Random::Random_Number(1, 2);
+  if(selection == 1)
+  {
+    int enemy_index = Random::Random_Number(0, Game::Enemy_list.size() - 1);
+    Location Zero_Location = {0,0};
+    Stats Zero_Stats = Stats();
+    Enemy enemy =  Enemy(Game::Enemy_list[enemy_index],Zero_Stats,Zero_Location,Game::player.getLevel()) ;
+    Game::current_Enemy = enemy;
+  }
+  if(selection == 2)
+  {
+    Game::current_Item = Game::Item_List[Random::Random_Number(0, Game::Item_List.size()-1)];
+  }
+  return selection;
 }
 
 void UI::PrintTurnActions()

@@ -3,7 +3,7 @@
 #include <string>
 #include <Stats.h>
 
-enum class Slot { Head, Torso, Hands, Legs, Right_Hand, Left_Hand };
+enum class Slot { None,Head, Torso, Hands, Legs, Right_Hand, Left_Hand };
 class SlotUtils {
 public:
   static Slot StringToSlot(const std::string &str) {
@@ -19,6 +19,8 @@ public:
       return Slot::Right_Hand;
     } else if (str == "Left Hand") {
       return Slot::Left_Hand;
+    } else if (str == "None") {
+      return Slot::None;
     } else {
       throw std::invalid_argument("Invalid slot name: " + str);
     }
@@ -37,6 +39,8 @@ public:
       return "Right Hand";
     case Slot::Left_Hand:
       return "Left Hand";
+    case Slot::None:
+      return "None";
     default:
       return "Unknown";
     }

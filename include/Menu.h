@@ -22,7 +22,8 @@ public:
     if (options.empty()) {
       return;
     }
-
+    items.clear();
+    new_menu(nullptr);
     window = derwin(win, height, width, y, x);
     keypad(window, true);
 
@@ -43,6 +44,8 @@ public:
               std::unordered_map<std::string, std::string> options) {
     if (options.empty())
       return;
+    items.clear();
+    new_menu(nullptr);
     window = derwin(win, height, width, y, x);
     keypad(window, true);
     for (auto &option : options) {

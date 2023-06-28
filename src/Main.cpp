@@ -21,12 +21,7 @@ int main(int argc, char *argv[]) {
       Game::ui.GenerateMainMenu(Game::MAIN_MENU_OPTIONS);
       break;
     case Game::Rest:
-      Game::INVENTORY = Game::player.getInventory();
-      Inventory_items.clear();
-      for (const auto &item : Game::INVENTORY) {
-        Inventory_items.push_back(item.Name);
-      }
-      Game::ui.GenerateRestUI(Inventory_items);
+      Game::ui.GenerateRestUI();
       break;
     case Game::Play_Game:
       //Game::ui.Clear();
@@ -43,7 +38,7 @@ int main(int argc, char *argv[]) {
       Game::ui.Clear();
       Game::ui.GenerateCharaterSelect(Game::CHARACTERS);
       // getch();
-      Game::game_state = Game::GameState::Play_Game;
+      Game::game_state = Game::GameState::Rest;
       break;
     case Game::End_Screen:
       Game::ui.Clear();

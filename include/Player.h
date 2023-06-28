@@ -150,16 +150,13 @@ public:
   }
   void DiscardItemFromInventory(Item& item)
   {
-    Inventory.erase(
-    std::remove_if(
-        Inventory.begin(),
-        Inventory.end(),
-        [&](const Item& item) {
-            return item.Name == item.Name;
-        }
-    ),
-    Inventory.end()
-);
+    auto it = Inventory.begin(); 
+    for(;it!=Inventory.end();it++)
+    {
+      if(item.Name == it->Name)
+        break;
+    }
+    Inventory.erase(it);
   }
 
 private:

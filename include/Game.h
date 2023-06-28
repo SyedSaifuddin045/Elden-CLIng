@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstring>
 #include <curses.h>
+#include <vector>
 
 class Enemy;
 class Player;
@@ -21,6 +22,8 @@ public:
   static std::vector<std::string> Enemy_list;
   static std::string S;
   static Enemy current_Enemy;
+  static Item current_Item;
+  static std::vector<Item> Item_List;
   enum GameState {
     Game_Title,
     Main_Menu,

@@ -18,6 +18,7 @@ std::vector<std::string> Game::MAIN_MENU_OPTIONS = {
   "Load","New Game","Exit"
 };
 Enemy Game::current_Enemy;
+Item Game::current_Item;
 std::vector<std::string> Game::CHARACTERS = Json::GetAllJson(".");
 
 std::mt19937 Random::engine{std::random_device{}()};
@@ -72,3 +73,9 @@ std::vector<Location> Game::Obstacle_Locations;
 std::string Game::S = "YOU DIED!";
 Player Game::player = Player::getInstance();
 std::vector<std::string> Game::Enemy_list = {"Smough","Ornstien","Kaiden Warrior","Magic Archer","Noble Swordsman","CrestFallen Warrior"};
+std::vector<Item> Game::Item_List = {
+  {"Estus Flask",Item::Consumable ,{0,0,50,0,0,0,0,0},Slot::None},
+  {"Rune Arc",Item::Consumable ,{20,20,20,20,20,20,20,20},Slot::None },
+  {"Curved Sword",Item::Weapon,{0,0,0,0,85,0,0,0},Slot::Right_Hand}
+};
+

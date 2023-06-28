@@ -19,13 +19,16 @@ class UI{
   void GenerateCharaterSelect(std::vector<std::string> &Characters);
   void GenerateEndScreen(std::string& S);
   void Generate_Grid(WINDOW* window, int row, int col);
-  void GenerateRestUI(std::vector<std::string> INVENTORY);
+  void GenerateRestUI();
   void GenerateStatusWindow();
   void Clear();
   void UpdatePlayerandEnemyPos();
   void PrintTurnActions();
   void PrintPlayerDetails(Window& window);
   std::string GetStatString(Item& item);
+  int GenerateRestRandom();
+  void PrintRestRandom(Window& window,int selection);
+  std::string GetCurrentEnemyStatString();
 
 void printAsciiArtInCenter(const char* asciiArt) {
     // Get the screen size
