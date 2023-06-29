@@ -711,6 +711,7 @@ void UI::Generate_Grid(WINDOW *window, int row, int col) {
     L.x = Game::col_beg + x;
     L.y = Game::row_beg + y;
     Game::Obstacle_Locations.push_back(L);
+    //Printing the obstacles
     mvwprintw(window, Game::row_beg + y, Game::col_beg + x, "0");
   }
   wattroff(window, A_BOLD | COLOR_PAIR(3));

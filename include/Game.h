@@ -40,6 +40,7 @@ public:
   static std::vector<Location> Obstacle_Locations;
   static bool isObstacleLocation(Location& L);
   static bool isPlayerLocation(Location L);
+  static bool isGameObstacle(Location L);
 
   static void ExitGame()
   {

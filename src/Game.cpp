@@ -53,7 +53,7 @@ bool Game::isEnemyLocation(Location L)
 }
 bool Game::isPlayerLocation(Location L)
 {
-  if(L.x == (Game::col_beg + (Game::player.getLocation().x * 2)) && L.y == (Game::row_beg + (Game::player.getLocation().y * 2)))
+  if(L.x == Game::player.getLocation().x && L.y == Game::player.getLocation().y)
     return true;
   else
    return false;
@@ -65,6 +65,20 @@ bool Game::isObstacleLocation(Location& L) {
       {
         return true;
       }
+    }
+    return false;
+  }
+  bool Game::isGameObstacle(Location L)
+  {
+    //int i =0;
+    for(auto OL:Game::Obstacle_Locations)
+    {
+      int location_x = (OL.x - Game::col_beg)/2;
+      int location_y = (OL.y - Game::row_beg)/2;
+      // mvwprintw(Game::ui.Game_Window.getWindow(),location_y,location_x,"%d,%d",location_x,location_y);
+      // i++;
+      if(L.x == location_x && L.y == location_y )
+        return true;
     }
     return false;
   }
